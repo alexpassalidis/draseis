@@ -99,6 +99,19 @@
   .ev .chip{font-weight:600;background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px rgba(19,30,41,.1)}
   .sub{font-size:13.5px;color:#3B4C5A}
   .note{font-size:13.5px;color:#3B4C5A;margin-top:5px}
+
+  /* Διακριτικές κατηγορίες: λευκή κάρτα, μικρότερα στοιχεία, λεπτή έγχρωμη λωρίδα */
+  .ev.quiet{background:rgba(255,255,255,.7);border-color:var(--line);box-shadow:none}
+  .ev.quiet .stripe{flex-basis:4px;filter:none}
+  .ev.quiet .ev-body{padding:10px 14px 10px 12px;gap:12px}
+  .ev.quiet .datebox{flex-basis:46px}
+  .ev.quiet .dnum{font-size:23px;font-weight:600;color:#42525F}
+  .ev.quiet .dname{font-size:12px;color:var(--muted);font-weight:400}
+  .ev.quiet .title{font-size:15px;font-weight:500;color:#2B3945}
+  .ev.quiet .time{background:none;color:var(--muted);padding:0;font-size:12.5px;margin-bottom:2px}
+  .ev.quiet .meta{margin-top:4px}
+  .ev.quiet .chip{background:#EDF1F4;box-shadow:none;font-size:12px;font-weight:500;color:#54636F}
+  .ev.quiet .sub,.ev.quiet .note{font-size:12.5px;color:var(--muted)}
   .ev.today{border-color:var(--blue);box-shadow:0 0 0 2px rgba(31,92,139,.18)}
   .flag{
     display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--blue);
@@ -177,7 +190,8 @@
 // ---- Ρυθμίσεις -------------------------------------------------------------
 const FILE  = "draseis.xlsx";   // το όνομα του αρχείου Excel μέσα στο repo
 const SHEET = "ΔΡΑΣΕΙΣ";        // το φύλλο με τα δεδομένα
-const QUIET = ["Αργία / Διακοπές"];   // κατηγορίες που εμφανίζονται διακριτικά
+const QUIET = ["Αργία / Διακοπές"];   // κατηγορίες που εμφανίζονται σε μία γραμμή
+const LOUD  = ["Εορτή / Εκκλησιασμός","Επιμόρφωση εκπαιδευτικών"];  // με γεμάτο χρώμα
 // ---------------------------------------------------------------------------
 
 const MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος",
@@ -201,6 +215,7 @@ const pad = n => String(n).padStart(2,"0");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const val = v => (v===null||v===undefined) ? "" : String(v).trim();
 const isQuiet = cat => QUIET.indexOf(cat) > -1;
+const isLoud  = cat => LOUD.indexOf(cat) > -1;
 
 let months = {}, keys = [], active = null, onlyActions = false, nextKey = null, usedCats = [];
 
@@ -299,7 +314,9 @@ function build(data){
 function evHTML(it, todayKey){
   const color = COLORS[it.cat] || "#CBD5DD";
   const isNext = (it.key + "|" + it.title) === nextKey;
-  let h = '<article class="ev' + (it.key === todayKey ? " today" : "") + '" style="background:' + color + '">' +
+  const loud = isLoud(it.cat);
+  let h = '<article class="ev' + (loud ? "" : " quiet") + (it.key === todayKey ? " today" : "") + '"' +
+    (loud ? ' style="background:' + color + '"' : "") + '>' +
     '<div class="stripe" style="background:' + color + '"></div><div class="ev-body">' +
     '<div class="datebox"><span class="dnum">' + it.date.getDate() + '</span>' +
     '<span class="dname">' + DAYS[it.date.getDay()].slice(0,3) + '</span></div><div class="main">';
