@@ -74,22 +74,35 @@
   .today .datebox .dnum{color:var(--blue)}
   .today{border-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
 
-  .events{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:8px}
+  .events{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:6px}
   .ev{
-    padding:9px 12px;border-radius:8px;
-    border-left:5px solid transparent;
+    padding:5px 9px;border-radius:6px;
+    border-left:3px solid transparent;
+    background:transparent;
+  }
+  .ev-title{font-size:14px;font-weight:500;overflow-wrap:break-word;color:var(--ink)}
+  .ev-time{font-size:13px;font-weight:600;color:var(--muted);margin-right:6px;font-variant-numeric:tabular-nums}
+  .meta{margin-top:3px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .chip{
+    font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;
+    background:#EEF1F4;color:#445A68;white-space:nowrap;
+  }
+  .sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .note{font-size:12px;color:var(--muted);margin-top:2px;font-style:italic}
+
+  /* Οι πραγματικές δράσεις (Δράση/Πρόγραμμα/Όμιλος) ξεχωρίζουν με γεμάτο χρώμα */
+  .ev.full{
+    padding:10px 12px;border-radius:8px;
+    border-left-width:5px;
     box-shadow:0 1px 2px rgba(21,32,43,.06);
   }
-  .ev-title{font-size:16px;font-weight:600;overflow-wrap:break-word;color:#1A2733}
-  .ev-time{font-size:14px;font-weight:700;color:#1A2733;margin-right:6px;font-variant-numeric:tabular-nums}
-  .meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .chip{
-    font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
-    background:rgba(255,255,255,.6);color:#1A2733;white-space:nowrap;
+  .ev.full .ev-title{font-size:16px;font-weight:600;color:#1A2733}
+  .ev.full .ev-time{font-size:14px;font-weight:700;color:#1A2733}
+  .ev.full .sub,.ev.full .note{color:#3B4C5A}
+  .ev.full .chip{
+    font-weight:700;background:rgba(255,255,255,.6);color:#1A2733;
     box-shadow:inset 0 0 0 1px rgba(21,32,43,.08);
   }
-  .sub{font-size:13px;color:#3B4C5A;margin-top:3px}
-  .note{font-size:13px;color:#3B4C5A;margin-top:3px;font-style:italic}
 
   .legend{
     display:flex;flex-wrap:wrap;gap:7px 16px;
@@ -276,7 +289,11 @@ function show(k){
       '<span class="dname">' + DAYS[g.date.getDay()] + '</span></div><div class="events">';
     g.items.forEach(it => {
       const c = COLORS[it.cat] || "#E8EDF1";
-      html += '<div class="ev" style="background:' + c + ';border-left-color:' + shade(c, -50) + '">' +
+      const isFull = it.cat === "Δράση / Πρόγραμμα / Όμιλος";
+      const style = isFull
+        ? 'background:' + c + ';border-left-color:' + shade(c, -50)
+        : 'border-left-color:' + c;
+      html += '<div class="ev' + (isFull ? ' full' : '') + '" style="' + style + '">' +
         '<div class="ev-title">' +
         (it.time ? '<span class="ev-time">' + esc(it.time) + '</span>' : "") + esc(it.title) + '</div>';
       const bits = [];
