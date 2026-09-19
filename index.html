@@ -186,6 +186,7 @@ const FILE  = "draseis.xlsx";   // το όνομα του αρχείου Excel �
 const SHEET = "ΔΡΑΣΕΙΣ";        // το φύλλο με τα δεδομένα
 const QUIET = ["Αργία / Διακοπές"];   // κατηγορίες που εμφανίζονται σε μία γραμμή
 const LOUD  = ["Εορτή / Εκκλησιασμός","Δράση"];  // με γεμάτο χρώμα
+const ACTION = "Δράση";              // μόνο αυτή η κατηγορία μετράει ως «δράση» στα πλήθη δίπλα στους μήνες
 // ---------------------------------------------------------------------------
 
 const MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος",
@@ -210,6 +211,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 const val = v => (v===null||v===undefined) ? "" : String(v).trim();
 const isQuiet = cat => QUIET.indexOf(cat) > -1;
 const isLoud  = cat => LOUD.indexOf(cat) > -1;
+const isAction = cat => cat === ACTION;
 
 let months = {}, keys = [], active = null, nextKey = null, usedCats = [];
 
@@ -280,7 +282,7 @@ function build(data){
 
   const nav = $("monthsInner"); nav.innerHTML = "";
   keys.forEach(k => {
-    const n = months[k].filter(i => !isQuiet(i.cat)).length;
+    const n = months[k].filter(i => isAction(i.cat)).length;
     const b = document.createElement("button");
     b.className = "mbtn"; b.type = "button"; b.dataset.k = k;
     b.innerHTML = MSHORT[+k.slice(5)-1] + " " + k.slice(2,4) +
@@ -291,7 +293,7 @@ function build(data){
 
   const sel = $("msel"); sel.innerHTML = "";
   keys.forEach(k => {
-    const n = months[k].filter(i => !isQuiet(i.cat)).length;
+    const n = months[k].filter(i => isAction(i.cat)).length;
     const o = document.createElement("option");
     o.value = k;
     o.textContent = MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) +
@@ -365,9 +367,11 @@ function show(k){
   const offs = mergeQuiet(list.filter(i => isQuiet(i.cat)));
   const t = new Date(), todayKey = t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate());
 
-  $("counts").textContent = acts.length
-    ? acts.length + (acts.length === 1 ? " δράση" : " δράσεις") + (offs.length ? " · " + offs.length + (offs.length===1?" αργία":" αργίες") : "")
-    : "καμία δράση αυτόν τον μήνα";
+  const nAct = acts.filter(i => isAction(i.cat)).length;
+  $("counts").textContent = [
+    nAct ? nAct + (nAct === 1 ? " δράση" : " δράσεις") : "καμία δράση",
+    offs.length ? offs.length + (offs.length === 1 ? " αργία" : " αργίες") : ""
+  ].filter(Boolean).join(" · ");
 
   let html = '<h2 class="month">' + MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
   html += acts.length
