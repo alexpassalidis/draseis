@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ημερολόγιο Δράσεων · 3ο Γυμνάσιο Πολίχνης</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1F4;
+    --card:#FFFFFF;
+    --ink:#15202B;
+    --muted:#5E6E7D;
+    --line:#D9E0E6;
+    --blue:#1F5C8B;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Commissioner",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-weight:400;
+    line-height:1.5;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
+
+  header.top{
+    background:var(--blue);
+    color:#fff;
+    padding:22px 0 18px;
+  }
+  header.top .wrap{padding-bottom:0}
+  .school{font-size:13px;font-weight:500;opacity:.85;margin:0}
+  h1{font-size:26px;font-weight:600;letter-spacing:-.01em;margin:2px 0 0}
+  .year{font-size:14px;opacity:.85;margin:4px 0 0}
+
+  .months{
+    position:sticky;top:0;z-index:5;
+    background:var(--paper);
+    border-bottom:1px solid var(--line);
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .months-inner{display:flex;gap:6px;max-width:760px;margin:0 auto;padding:10px 16px}
+  .mbtn{
+    flex:0 0 auto;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--muted);
+    font:inherit;font-size:14px;font-weight:500;
+    padding:7px 13px;border-radius:999px;cursor:pointer;
+    white-space:nowrap;
+  }
+  .mbtn:hover{border-color:#B9C6D1;color:var(--ink)}
+  .mbtn[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+  .mbtn:focus-visible{outline:3px solid #7FB2D8;outline-offset:2px}
+  .mbtn .cnt{opacity:.65;font-weight:400;margin-left:6px}
+
+  .daygroup{margin-top:18px}
+  .daygroup:first-child{margin-top:22px}
+  .day{
+    display:flex;gap:14px;align-items:flex-start;
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 14px;margin-bottom:8px;
+  }
+  .datebox{flex:0 0 52px;text-align:center;padding-top:2px}
+  .dnum{display:block;font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+  .dname{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+  .today .datebox .dnum{color:var(--blue)}
+  .today{border-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
+
+  .events{flex:1 1 auto;min-width:0}
+  .ev{padding:6px 0;border-top:1px dashed var(--line)}
+  .ev:first-child{border-top:0;padding-top:0}
+  .ev:last-child{padding-bottom:0}
+  .ev-title{font-size:16px;font-weight:500;overflow-wrap:break-word}
+  .ev-time{font-size:14px;font-weight:600;color:var(--blue);margin-right:6px;font-variant-numeric:tabular-nums}
+  .meta{margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .chip{
+    font-size:12px;padding:2px 9px;border-radius:999px;
+    background:#E8EDF1;color:#2A3B49;white-space:nowrap;
+  }
+  .sub{font-size:13px;color:var(--muted);margin-top:3px}
+  .note{font-size:13px;color:var(--muted);margin-top:3px;font-style:italic}
+
+  .empty,.state{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px;text-align:center;color:var(--muted);margin-top:22px;
+  }
+  .state.err{border-color:#E0B4B4;color:#8A3A3A;background:#FDF4F4;text-align:left}
+  footer{margin-top:26px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  footer a{color:var(--blue)}
+  @media (max-width:420px){
+    h1{font-size:22px}
+    .datebox{flex-basis:44px}
+    .dnum{font-size:22px}
+  }
+  @media print{
+    .months{display:none}
+    header.top{background:#fff;color:#000}
+    .day{break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <p class="school">3ο Γυμνάσιο Πολίχνης</p>
+    <h1>Ημερολόγιο Δράσεων</h1>
+    <p class="year" id="schoolyear">Σχολικό έτος 2026–27</p>
+  </div>
+</header>
+
+<nav class="months" id="months" hidden><div class="months-inner" id="monthsInner"></div></nav>
+
+<main class="wrap">
+  <div id="content"><div class="state" id="loading">Φόρτωση δράσεων…</div></div>
+  <footer>
+    <span id="updated"></span>
+    <a href="#" id="reload">Ανανέωση</a>
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ---- Ρυθμίσεις -------------------------------------------------------------
+const FILE   = "draseis.xlsx";   // το όνομα του αρχείου Excel μέσα στο repo
+const SHEET  = "ΔΡΑΣΕΙΣ";       // το φύλλο με τα δεδομένα
+// ---------------------------------------------------------------------------
+
+const MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος",
+                "Ιούλιος","Αύγουστος","Σεπτέμβριος","Οκτώβριος","Νοέμβριος","Δεκέμβριος"];
+const MONTHS_SHORT = ["Ιαν","Φεβ","Μάρ","Απρ","Μάι","Ιούν","Ιούλ","Αύγ","Σεπ","Οκτ","Νοέ","Δεκ"];
+const DAYS = ["Κυρ","Δευ","Τρί","Τετ","Πέμ","Παρ","Σάβ"];
+
+const COLORS = {
+  "Αργία / Διακοπές":              "#F4B6B6",
+  "Εορτή / Εκκλησιασμός":          "#FFE08A",
+  "Εκδρομή / Επίσκεψη / Περίπατος":"#B7DE9C",
+  "Σύλλογος διδασκόντων":          "#D0CECE",
+  "Ενημέρωση γονέων / Έλεγχοι":    "#F9C08A",
+  "Ορόσημο / Εξετάσεις":           "#A9CDEB",
+  "Επιμόρφωση εκπαιδευτικών":      "#C4B5DC",
+  "Δράση / Πρόγραμμα / Όμιλος":    "#9FD8CE"
+};
+
+const $ = id => document.getElementById(id);
+let groups = {}, keys = [], active = null;
+
+function parseDate(v){
+  if (v instanceof Date && !isNaN(v)) return v;
+  if (typeof v === "number"){ const d = XLSX.SSF.parse_date_code(v); return d ? new Date(d.y, d.m-1, d.d) : null; }
+  if (typeof v === "string"){
+    const m = v.trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if (m){ let y = +m[3]; if (y < 100) y += 2000; return new Date(y, +m[2]-1, +m[1]); }
+    const d = new Date(v); if (!isNaN(d)) return d;
+  }
+  return null;
+}
+const val = v => (v === null || v === undefined) ? "" : String(v).trim();
+const pad = n => String(n).padStart(2,"0");
+
+function load(){
+  $("content").innerHTML = '<div class="state">Φόρτωση δράσεων…</div>';
+  fetch(FILE + "?t=" + Date.now(), {cache:"no-store"})
+    .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); 
+      const lm = r.headers.get("last-modified");
+      if (lm) $("updated").textContent = "Τελευταία ενημέρωση αρχείου: " +
+        new Date(lm).toLocaleDateString("el-GR",{day:"numeric",month:"long",year:"numeric"});
+      return r.arrayBuffer(); })
+    .then(buf => render(new Uint8Array(buf)))
+    .catch(e => {
+      $("content").innerHTML = '<div class="state err"><b>Δεν φορτώθηκε το αρχείο.</b><br>' +
+        'Έλεγξε ότι το αρχείο <code>' + FILE + '</code> βρίσκεται στο ίδιο repo με τη σελίδα. (' + e.message + ')</div>';
+    });
+}
+
+function render(data){
+  const wb = XLSX.read(data, {type:"array", cellDates:true});
+  const ws = wb.Sheets[SHEET] || wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, {defval:null});
+
+  groups = {};
+  rows.forEach(r => {
+    const d = parseDate(r["ΗΜΕΡΟΜΗΝΙΑ"]);
+    const title = val(r["ΤΙΤΛΟΣ ΔΡΑΣΗΣ"]);
+    if (!d || !title) return;
+    const mk = d.getFullYear() + "-" + pad(d.getMonth()+1);
+    const dk = mk + "-" + pad(d.getDate());
+    (groups[mk] = groups[mk] || {})[dk] = (groups[mk][dk] || {date:d, items:[]});
+    groups[mk][dk].items.push({
+      time: val(r["ΩΡΕΣ"]),
+      title: title,
+      cat: val(r["ΚΑΤΗΓΟΡΙΑ"]),
+      classes: val(r["ΤΑΞΕΙΣ / ΤΜΗΜΑΤΑ"]),
+      who: val(r["ΥΠΕΥΘΥΝΟΣ"]),
+      note: val(r["ΣΗΜΕΙΩΣΕΙΣ"])
+    });
+  });
+
+  keys = Object.keys(groups).sort();
+  if (!keys.length){ $("content").innerHTML = '<div class="state">Δεν βρέθηκαν δράσεις στο αρχείο.</div>'; return; }
+
+  const now = new Date(), cur = now.getFullYear() + "-" + pad(now.getMonth()+1);
+  active = keys.includes(cur) ? cur : keys.find(k => k >= cur) || keys[keys.length-1];
+
+  const y1 = +keys[0].slice(0,4), y2 = +keys[keys.length-1].slice(0,4);
+  $("schoolyear").textContent = "Σχολικό έτος " + y1 + "–" + String(y2).slice(2);
+
+  const nav = $("monthsInner"); nav.innerHTML = "";
+  keys.forEach(k => {
+    const b = document.createElement("button");
+    b.className = "mbtn"; b.type = "button"; b.dataset.k = k;
+    const n = Object.keys(groups[k]).length;
+    b.innerHTML = MONTHS_SHORT[+k.slice(5)-1] + " " + k.slice(2,4) + '<span class="cnt">' + n + "</span>";
+    b.onclick = () => show(k);
+    nav.appendChild(b);
+  });
+  $("months").hidden = false;
+  show(active);
+}
+
+function show(k){
+  active = k;
+  document.querySelectorAll(".mbtn").forEach(b => b.setAttribute("aria-pressed", b.dataset.k === k));
+  const btn = document.querySelector('.mbtn[data-k="' + k + '"]');
+  if (btn) btn.scrollIntoView({block:"nearest", inline:"center", behavior:"smooth"});
+
+  const days = groups[k], dkeys = Object.keys(days).sort();
+  const today = new Date(); const tk = today.getFullYear()+"-"+pad(today.getMonth()+1)+"-"+pad(today.getDate());
+  let html = "<h2 style='font-size:19px;font-weight:600;margin:22px 0 12px'>" +
+             MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
+
+  if (!dkeys.length){ html += '<div class="empty">Καμία δράση αυτόν τον μήνα.</div>'; }
+
+  dkeys.forEach(dk => {
+    const g = days[dk];
+    html += '<div class="day' + (dk === tk ? " today" : "") + '">' +
+      '<div class="datebox"><span class="dnum">' + g.date.getDate() + '</span>' +
+      '<span class="dname">' + DAYS[g.date.getDay()] + '</span></div><div class="events">';
+    g.items.forEach(it => {
+      const c = COLORS[it.cat] || "#E8EDF1";
+      html += '<div class="ev"><div class="ev-title">' +
+        (it.time ? '<span class="ev-time">' + esc(it.time) + '</span>' : "") + esc(it.title) + '</div>';
+      const bits = [];
+      if (it.classes) bits.push(esc(it.classes));
+      if (it.who) bits.push("Υπεύθ.: " + esc(it.who));
+      if (it.cat || bits.length){
+        html += '<div class="meta">';
+        if (it.cat) html += '<span class="chip" style="background:' + c + '">' + esc(it.cat) + '</span>';
+        if (bits.length) html += '<span class="sub">' + bits.join(" · ") + '</span>';
+        html += '</div>';
+      }
+      if (it.note) html += '<div class="note">' + esc(it.note) + '</div>';
+      html += '</div>';
+    });
+    html += "</div></div>";
+  });
+  $("content").innerHTML = html;
+}
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+$("reload").onclick = e => { e.preventDefault(); load(); };
+load();
+</script>
+</body>
+</html>
