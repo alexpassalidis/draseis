@@ -242,7 +242,9 @@ function load(){
 }
 
 function build(data){
-  const wb = XLSX.read(data,{type:"array",cellDates:true});
+  // Χωρίς cellDates: οι ημερομηνίες μένουν σειριακοί αριθμοί και μετατρέπονται
+  // στην parseDate, αλλιώς η ζώνη ώρας τις μετατοπίζει κατά μία ημέρα.
+  const wb = XLSX.read(data,{type:"array"});
   const ws = wb.Sheets[SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws,{defval:null});
 
