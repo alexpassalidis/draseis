@@ -74,19 +74,30 @@
   .today .datebox .dnum{color:var(--blue)}
   .today{border-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
 
-  .events{flex:1 1 auto;min-width:0}
-  .ev{padding:6px 0;border-top:1px dashed var(--line)}
-  .ev:first-child{border-top:0;padding-top:0}
-  .ev:last-child{padding-bottom:0}
-  .ev-title{font-size:16px;font-weight:500;overflow-wrap:break-word}
-  .ev-time{font-size:14px;font-weight:600;color:var(--blue);margin-right:6px;font-variant-numeric:tabular-nums}
-  .meta{margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-  .chip{
-    font-size:12px;padding:2px 9px;border-radius:999px;
-    background:#E8EDF1;color:#2A3B49;white-space:nowrap;
+  .events{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:8px}
+  .ev{
+    padding:9px 12px;border-radius:8px;
+    border-left:5px solid transparent;
+    box-shadow:0 1px 2px rgba(21,32,43,.06);
   }
-  .sub{font-size:13px;color:var(--muted);margin-top:3px}
-  .note{font-size:13px;color:var(--muted);margin-top:3px;font-style:italic}
+  .ev-title{font-size:16px;font-weight:600;overflow-wrap:break-word;color:#1A2733}
+  .ev-time{font-size:14px;font-weight:700;color:#1A2733;margin-right:6px;font-variant-numeric:tabular-nums}
+  .meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .chip{
+    font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;
+    background:rgba(255,255,255,.6);color:#1A2733;white-space:nowrap;
+    box-shadow:inset 0 0 0 1px rgba(21,32,43,.08);
+  }
+  .sub{font-size:13px;color:#3B4C5A;margin-top:3px}
+  .note{font-size:13px;color:#3B4C5A;margin-top:3px;font-style:italic}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:7px 16px;
+    max-width:760px;margin:0 auto;padding:12px 16px;
+    background:var(--card);border-bottom:1px solid var(--line);
+  }
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .legend-dot{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
 
   .empty,.state{
     background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
@@ -101,9 +112,10 @@
     .dnum{font-size:22px}
   }
   @media print{
-    .months{display:none}
+    .months,.legend{display:none}
     header.top{background:#fff;color:#000}
     .day{break-inside:avoid}
+    .ev{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
 </style>
 </head>
@@ -118,6 +130,7 @@
 </header>
 
 <nav class="months" id="months" hidden><div class="months-inner" id="monthsInner"></div></nav>
+<div class="legend" id="legend" hidden></div>
 
 <main class="wrap">
   <div id="content"><div class="state" id="loading">Φόρτωση δράσεων…</div></div>
@@ -223,7 +236,24 @@ function render(data){
     nav.appendChild(b);
   });
   $("months").hidden = false;
+
+  const used = new Set();
+  keys.forEach(k => Object.values(groups[k]).forEach(g => g.items.forEach(it => { if (it.cat) used.add(it.cat); })));
+  const legend = $("legend"); legend.innerHTML = "";
+  Object.keys(COLORS).filter(c => used.has(c)).forEach(c => {
+    legend.innerHTML += '<span class="legend-item"><span class="legend-dot" style="background:' +
+      COLORS[c] + '"></span>' + esc(c) + '</span>';
+  });
+  legend.hidden = legend.innerHTML === "";
+
   show(active);
+}
+
+function shade(hex, amt){
+  const n = parseInt(hex.replace('#',''), 16);
+  let r = (n >> 16) + amt, g = ((n >> 8) & 0xFF) + amt, b = (n & 0xFF) + amt;
+  r = Math.max(0, Math.min(255, r)); g = Math.max(0, Math.min(255, g)); b = Math.max(0, Math.min(255, b));
+  return "#" + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
 }
 
 function show(k){
@@ -246,14 +276,15 @@ function show(k){
       '<span class="dname">' + DAYS[g.date.getDay()] + '</span></div><div class="events">';
     g.items.forEach(it => {
       const c = COLORS[it.cat] || "#E8EDF1";
-      html += '<div class="ev"><div class="ev-title">' +
+      html += '<div class="ev" style="background:' + c + ';border-left-color:' + shade(c, -50) + '">' +
+        '<div class="ev-title">' +
         (it.time ? '<span class="ev-time">' + esc(it.time) + '</span>' : "") + esc(it.title) + '</div>';
       const bits = [];
       if (it.classes) bits.push(esc(it.classes));
       if (it.who) bits.push("Υπεύθ.: " + esc(it.who));
       if (it.cat || bits.length){
         html += '<div class="meta">';
-        if (it.cat) html += '<span class="chip" style="background:' + c + '">' + esc(it.cat) + '</span>';
+        if (it.cat) html += '<span class="chip">' + esc(it.cat) + '</span>';
         if (bits.length) html += '<span class="sub">' + bits.join(" · ") + '</span>';
         html += '</div>';
       }
