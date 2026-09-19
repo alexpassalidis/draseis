@@ -41,7 +41,7 @@
   }
   .mbtn:hover{border-color:#B4C3CF;color:var(--ink)}
   .mbtn[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
-  .mbtn:focus-visible,.toggle:focus-visible{outline:3px solid #7FB2D8;outline-offset:2px}
+  .mbtn:focus-visible{outline:3px solid #7FB2D8;outline-offset:2px}
   .badge{
     min-width:19px;height:19px;padding:0 5px;border-radius:999px;
     background:#E4761F;color:#fff;font-size:12px;font-weight:700;
@@ -67,12 +67,7 @@
   .arrow:focus-visible,.msel:focus-visible{outline:3px solid #7FB2D8;outline-offset:2px}
   .hint{max-width:780px;margin:0 auto;padding:2px 16px 0;font-size:12.5px;color:var(--muted)}
 
-  .filters{max-width:780px;margin:0 auto;padding:4px 16px 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-  .toggle{
-    border:1px solid var(--line);background:var(--card);color:var(--muted);
-    font:inherit;font-size:13px;padding:5px 11px;border-radius:999px;cursor:pointer;
-  }
-  .toggle[aria-pressed="true"]{background:#13324A;border-color:#13324A;color:#fff}
+  .filters{max-width:780px;margin:0 auto;padding:4px 16px 10px}
   .counts{font-size:13px;color:var(--muted)}
 
   h2.month{font-size:20px;font-weight:600;margin:24px 0 14px}
@@ -171,7 +166,6 @@
   <p class="hint">Άλλαξε μήνα με τα βελάκια, τη λίστα ή τα κουμπιά πιο κάτω.</p>
   <div class="months"><div class="months-inner" id="monthsInner"></div></div>
   <div class="filters">
-    <button class="toggle" id="onlyActions" type="button" aria-pressed="false">Μόνο δράσεις</button>
     <span class="counts" id="counts"></span>
   </div>
 </div>
@@ -217,7 +211,7 @@ const val = v => (v===null||v===undefined) ? "" : String(v).trim();
 const isQuiet = cat => QUIET.indexOf(cat) > -1;
 const isLoud  = cat => LOUD.indexOf(cat) > -1;
 
-let months = {}, keys = [], active = null, onlyActions = false, nextKey = null, usedCats = [];
+let months = {}, keys = [], active = null, nextKey = null, usedCats = [];
 
 function parseDate(v){
   if (v instanceof Date && !isNaN(v)) return v;
@@ -378,7 +372,7 @@ function show(k){
     ? acts.map(it => evHTML(it, todayKey)).join("")
     : '<div class="empty">Δεν έχει προγραμματιστεί δράση αυτόν τον μήνα.</div>';
 
-  if (!onlyActions && offs.length){
+  if (offs.length){
     html += offs.map(o => {
       const same = o.from.getTime() === o.to.getTime();
       const when = same
@@ -391,12 +385,6 @@ function show(k){
   $("content").innerHTML = html;
 }
 
-$("onlyActions").onclick = function(){
-  onlyActions = !onlyActions;
-  this.setAttribute("aria-pressed", onlyActions);
-  this.textContent = onlyActions ? "Εμφάνιση όλων" : "Μόνο δράσεις";
-  show(active);
-};
 $("prev").onclick = () => { const i = keys.indexOf(active); if (i > 0) show(keys[i-1]); };
 $("next").onclick = () => { const i = keys.indexOf(active); if (i < keys.length-1) show(keys[i+1]); };
 document.addEventListener("keydown", e => {
