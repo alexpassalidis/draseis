@@ -333,6 +333,15 @@ function evHTML(it, todayKey){
   return h + '</div></div></article>';
 }
 
+function offHTML(o){
+  const same = o.from.getTime() === o.to.getTime();
+  const when = same
+    ? o.from.getDate() + " " + MSHORT[o.from.getMonth()] + ", " + DAYS[o.from.getDay()]
+    : o.from.getDate() + "–" + o.to.getDate() + " " + MSHORT[o.to.getMonth()];
+  return '<div class="off"><span class="dot"></span><span class="when">' + when +
+         '</span><span>' + esc(o.title) + '</span></div>';
+}
+
 // Ενώνει συνεχόμενες μέρες αργίας με τον ίδιο τίτλο σε μία γραμμή
 function mergeQuiet(list){
   const out = [];
@@ -373,21 +382,15 @@ function show(k){
     offs.length ? offs.length + (offs.length === 1 ? " αργία" : " αργίες") : ""
   ].filter(Boolean).join(" · ");
 
-  let html = '<h2 class="month">' + MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
-  html += acts.length
-    ? acts.map(it => evHTML(it, todayKey)).join("")
-    : '<div class="empty">Δεν έχει προγραμματιστεί δράση αυτόν τον μήνα.</div>';
+  // Ένα ενιαίο χρονολογικό ρεύμα: δράσεις και αργίες στη σειρά της ημερομηνίας τους.
+  // Οι αργίες μπαίνουν με την πρώτη τους μέρα και, σε ισοβαθμία, πριν από τη δράση.
+  const stream = acts.map(it => ({when:it.date, it:it}))
+    .concat(offs.map(o => ({when:o.from, o:o})))
+    .sort((a,b) => (a.when - b.when) || ((b.o?1:0) - (a.o?1:0)));
 
-  if (offs.length){
-    html += offs.map(o => {
-      const same = o.from.getTime() === o.to.getTime();
-      const when = same
-        ? o.from.getDate() + " " + MSHORT[o.from.getMonth()] + ", " + DAYS[o.from.getDay()]
-        : o.from.getDate() + "–" + o.to.getDate() + " " + MSHORT[o.to.getMonth()];
-      return '<div class="off"><span class="dot"></span><span class="when">' + when +
-             '</span><span>' + esc(o.title) + '</span></div>';
-    }).join("");
-  }
+  let html = '<h2 class="month">' + MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
+  if (!acts.length) html += '<div class="empty">Δεν έχει προγραμματιστεί δράση αυτόν τον μήνα.</div>';
+  html += stream.map(x => x.o ? offHTML(x.o) : evHTML(x.it, todayKey)).join("");
   $("content").innerHTML = html;
 }
 
