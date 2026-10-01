@@ -185,8 +185,9 @@
 const FILE  = "draseis.xlsx";   // το όνομα του αρχείου Excel μέσα στο repo
 const SHEET = "ΔΡΑΣΕΙΣ";        // το φύλλο με τα δεδομένα
 const QUIET = ["Αργία / Διακοπές"];   // κατηγορίες που εμφανίζονται σε μία γραμμή
-const LOUD  = ["Εορτή / Εκκλησιασμός","Δράση"];  // με γεμάτο χρώμα
-const ACTION = "Δράση";              // μόνο αυτή η κατηγορία μετράει ως «δράση» στα πλήθη δίπλα στους μήνες
+const LOUD  = ["Εορτή / Εκκλησιασμός"];        // με γεμάτο χρώμα (οι δράσεις είναι πάντα «loud»)
+const ACTION_PREFIX = "Δράση";       // κάθε κατηγορία που αρχίζει από «Δράση» = δράση: μωβ, γεμάτο χρώμα, μετράει στα πλήθη
+const ACTION_COLOR  = "#C4B5DC";     // το μωβ των δράσεων
 // ---------------------------------------------------------------------------
 
 const MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος",
@@ -201,8 +202,8 @@ const COLORS = {
   "Σύλλογος διδασκόντων":          "#D0CECE",
   "Ενημέρωση γονέων / Έλεγχοι":    "#F9C08A",
   "Ορόσημο / Εξετάσεις":           "#A9CDEB",
-  "Δράση":                         "#C4B5DC",
-  "Δράση / Πρόγραμμα / Όμιλος":    "#9FD8CE"
+  "Δράση":                         ACTION_COLOR,
+  "Δράση / Πρόγραμμα / Όμιλος":    ACTION_COLOR
 };
 
 const $ = id => document.getElementById(id);
@@ -210,8 +211,9 @@ const pad = n => String(n).padStart(2,"0");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const val = v => (v===null||v===undefined) ? "" : String(v).trim();
 const isQuiet = cat => QUIET.indexOf(cat) > -1;
-const isLoud  = cat => LOUD.indexOf(cat) > -1;
-const isAction = cat => cat === ACTION;
+const isLoud  = cat => LOUD.indexOf(cat) > -1 || isAction(cat);
+const isAction = cat => cat.indexOf(ACTION_PREFIX) === 0;
+const catColor = (cat,def) => COLORS[cat] || (isAction(cat) ? ACTION_COLOR : (def || "#CBD5DD"));
 
 let months = {}, keys = [], active = null, nextKey = null, usedCats = [];
 
@@ -303,14 +305,14 @@ function build(data){
   sel.onchange = () => show(sel.value);
 
   $("legend").innerHTML = usedCats.map(c =>
-    '<span class="chip" style="background:' + (COLORS[c]||"#E8EDF1") + '">' + esc(c) + '</span>').join("");
+    '<span class="chip" style="background:' + catColor(c,"#E8EDF1") + '">' + esc(c) + '</span>').join("");
   $("legend").hidden = false;
   $("bar").hidden = false;
   show(active);
 }
 
 function evHTML(it, todayKey){
-  const color = COLORS[it.cat] || "#CBD5DD";
+  const color = catColor(it.cat);
   const isNext = (it.key + "|" + it.title) === nextKey;
   const loud = isLoud(it.cat);
   let h = '<article class="ev' + (loud ? "" : " quiet") + (it.key === todayKey ? " today" : "") + '"' +
