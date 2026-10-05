@@ -216,7 +216,6 @@ function fromSerial(n){
 function parseDate(v){
   if (v instanceof Date && !isNaN(v)) return new Date(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate());
   if (typeof v === "number") return fromSerial(v);
-  if (typeof v === "number"){ const d = XLSX.SSF.parse_date_code(v); return d ? new Date(d.y,d.m-1,d.d) : null; }
   if (typeof v === "string"){
     const m = v.trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
     if (m){ let y = +m[3]; if (y<100) y += 2000; return new Date(y, +m[2]-1, +m[1]); }
@@ -366,18 +365,22 @@ function show(k){
     : "καμία δράση αυτόν τον μήνα")
     + (offs.length ? " · " + offs.length + (offs.length === 1 ? " λοιπή ημερομηνία" : " λοιπές ημερομηνίες") : "");
 
-  let html = '<h2 class="month">' + MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
-  html += acts.length
-    ? acts.map(it => evHTML(it, todayKey)).join("")
-    : '<div class="empty">Καμία εκδρομή ή δράση αυτόν τον μήνα.</div>';
+  // Όλα σε ενιαία χρονολογική σειρά: δράσεις και λοιπές ημερομηνίες ανάμεικτα
+  const feed = acts.map(it => ({when:it.date, kind:"ev", it:it}));
+  if (!onlyActions) offs.forEach(o => feed.push({when:o.from, kind:"off", it:o}));
+  feed.sort((a,b) => (a.when - b.when) || (a.kind === "ev" ? -1 : 1));
 
-  if (!onlyActions && offs.length){
-    html += offs.map(o => {
+  let html = '<h2 class="month">' + MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
+  if (!feed.length){
+    html += '<div class="empty">Καμία καταχώρηση αυτόν τον μήνα.</div>';
+  } else {
+    html += feed.map(f => {
+      if (f.kind === "ev") return evHTML(f.it, todayKey);
+      const o = f.it, c = COLORS[o.cat] || "#CBD5DD";
       const same = o.from.getTime() === o.to.getTime();
       const when = same
         ? o.from.getDate() + " " + MSHORT[o.from.getMonth()] + ", " + DAYS[o.from.getDay()]
         : o.from.getDate() + "–" + o.to.getDate() + " " + MSHORT[o.to.getMonth()];
-      const c = COLORS[o.cat] || "#CBD5DD";
       return '<div class="off" style="background:' + c + '3D;border-left-color:' + c + '">' +
              '<span class="when">' + when + '</span><span>' + esc(o.title) + '</span></div>';
     }).join("");
