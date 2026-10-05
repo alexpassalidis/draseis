@@ -207,8 +207,15 @@ const isQuiet = cat => ACTIONS.indexOf(cat) === -1;
 
 let months = {}, keys = [], active = null, onlyActions = false, nextKey = null, usedCats = [];
 
+// Μετατροπή αριθμού του Excel σε ημερομηνία, χωρίς καμία εξάρτηση από ζώνη ώρας
+function fromSerial(n){
+  const d = new Date(Math.round((Math.floor(n) - 25569) * 86400000));
+  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+}
+
 function parseDate(v){
-  if (v instanceof Date && !isNaN(v)) return v;
+  if (v instanceof Date && !isNaN(v)) return new Date(v.getUTCFullYear(), v.getUTCMonth(), v.getUTCDate());
+  if (typeof v === "number") return fromSerial(v);
   if (typeof v === "number"){ const d = XLSX.SSF.parse_date_code(v); return d ? new Date(d.y,d.m-1,d.d) : null; }
   if (typeof v === "string"){
     const m = v.trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
@@ -236,7 +243,7 @@ function load(){
 }
 
 function build(data){
-  const wb = XLSX.read(data,{type:"array",cellDates:true});
+  const wb = XLSX.read(data,{type:"array"});
   const ws = wb.Sheets[SHEET] || wb.Sheets[wb.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(ws,{defval:null});
 
