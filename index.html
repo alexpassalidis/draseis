@@ -320,7 +320,6 @@ function evHTML(it, todayKey){
   h += '<div class="meta">';
   if (it.classes) h += '<span class="cls">' + esc(it.classes) + '</span>';
   if (it.cat) h += '<span class="chip" style="background:' + color + '">' + esc(it.cat) + '</span>';
-  if (it.who) h += '<span class="sub">Υπεύθυνος: ' + esc(it.who) + '</span>';
   h += '</div>';
   if (it.note) h += '<div class="note">' + esc(it.note) + '</div>';
   return h + '</div></div></article>';
