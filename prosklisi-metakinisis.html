@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Πρόσκληση για μετακίνηση χωρίς διανυκτέρευση</title>
+<style>
+:root{
+  --bg:#e8edf1; --surface:#ffffff; --paper:#ffffff; --ink:#1a2530; --muted:#5a6876;
+  --line:#c9d3dc; --accent:#1f5a96; --accent-ink:#ffffff; --ok:#2f7d4f; --warn:#a3341f;
+  --field:#f7f9fb; --focus:#f2b134;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141b22; --surface:#1c252e; --paper:#f4f6f8; --ink:#e3e9ef; --muted:#9aa8b5;
+    --line:#33414e; --accent:#6fa6dd; --accent-ink:#0e1820; --ok:#6cc392; --warn:#ef8a74;
+    --field:#232e39; --focus:#f2b134; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141b22; --surface:#1c252e; --paper:#f4f6f8; --ink:#e3e9ef; --muted:#9aa8b5;
+  --line:#33414e; --accent:#6fa6dd; --accent-ink:#0e1820; --ok:#6cc392; --warn:#ef8a74;
+  --field:#232e39; --focus:#f2b134; color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Commissioner","Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px 60px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+header.top{grid-column:1/-1}
+header.top h1{font-size:clamp(1.5rem,2.6vw,2.1rem);line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-.01em}
+header.top p{margin:0;color:var(--muted);max-width:70ch}
+.law{margin-top:14px;padding:12px 16px;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;font-size:.92rem;color:var(--muted);max-width:80ch}
+form{display:flex;flex-direction:column;gap:18px}
+fieldset{margin:0;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:18px 18px 20px;min-width:0}
+legend{padding:0 8px;font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px}
+.mark{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid var(--line);font-family:"Noto Serif",Georgia,serif;font-weight:700;font-size:1rem;color:var(--muted);transition:background .2s,border-color .2s,color .2s}
+.mark.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.hint{color:var(--muted);font-size:.88rem;margin:2px 0 10px}
+label{display:block;font-weight:500;font-size:.93rem;margin:12px 0 4px}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=email],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+textarea{min-height:76px;resize:vertical}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row>div{min-width:0}
+input,select,textarea,.row,.row>div{min-width:0;box-sizing:border-box}
+details.admin{min-width:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.row label{margin-top:8px}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.chip span{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--field);font-size:.92rem;user-select:none}
+.chip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip input:focus-visible+span{outline:3px solid var(--focus);outline-offset:2px}
+.list .opt{display:flex;gap:10px;align-items:flex-start;margin:7px 0}
+.list .opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.stops{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.stop{display:grid;grid-template-columns:minmax(230px,auto) 1fr auto;gap:8px}
+.tp{display:flex;gap:4px;min-width:0}
+.tp select{flex:1 1 0;min-width:0;padding-left:6px;padding-right:4px}
+.tp select:last-child{flex:1.3 1 0}
+@media (max-width:560px){.stop{grid-template-columns:1fr auto}.stop .tp{grid-column:1/-1}}
+.icon-btn{border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:8px;width:40px;font-size:1.2rem;cursor:pointer}
+.btn{font:inherit;font-weight:600;border-radius:9px;padding:10px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff;width:100%;padding:13px 16px;margin-top:6px}
+.btn.small{padding:6px 12px;font-size:.9rem}
+.total{margin-top:10px;font-weight:600}
+.status{font-size:.9rem;margin-top:8px}
+.status.bad{color:var(--warn)} .status.good{color:var(--ok)}
+details.admin{border:1px dashed var(--line);border-radius:12px;background:var(--surface);padding:4px 18px}
+details.admin summary{cursor:pointer;font-weight:700;padding:12px 0}
+.side{position:sticky;top:calc(16px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:12px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.sendmsg{font-weight:600;flex-basis:100%}
+.sendmsg.ok{color:var(--ok)} .sendmsg.bad{color:var(--warn)}
+.btn[disabled]{opacity:.6;cursor:default}
+body.leader .admin-only,body.admin .leader-only{display:none!important}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.checklist h2{font-size:1rem;margin:0 0 8px}
+.checklist ul{margin:0;padding-left:20px}
+.checklist .ok{color:var(--ok);font-weight:600;margin:0}
+.toast{min-height:1.4em;font-size:.92rem;color:var(--ok)}
+.sheet{background:var(--paper);color:#1a1a1a;border-radius:4px;box-shadow:0 1px 0 var(--line),0 12px 30px -18px rgba(10,30,50,.45);padding:44px 48px;max-height:calc(100vh - 160px);overflow:auto}
+.doc{font-family:"Noto Serif",Georgia,"Times New Roman",serif;font-size:15px;line-height:1.6}
+.doc h2{font-size:17px;text-align:center;margin:18px 0 4px;letter-spacing:.02em}
+.doc h3{font-size:15px;margin:16px 0 4px}
+.doc p{margin:6px 0}
+.doc ul{margin:4px 0 4px 22px;padding:0}
+.doc .head{display:flex;justify-content:space-between;gap:16px;font-size:14px}
+.doc .sub{text-align:center;font-style:italic;margin:0 0 12px}
+.doc .empty{color:#9a6b12;background:#fff3d6;padding:0 4px;border-radius:3px}
+.doc .sign{margin-top:28px;text-align:right}
+.doc table{border-collapse:collapse;width:100%}
+.doc .pb{border-top:2px dashed #b9c3cc;margin:30px 0 10px}
+.sub-h{margin:20px 0 0;font-size:1rem}
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static}
+  .sheet{max-height:none;padding:28px 22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Μετακίνηση μαθητών χωρίς διανυκτέρευση</h1>
+    <p class="leader-only">Συμπλήρωσε τα στοιχεία της μετακίνησης και πάτα «Αποστολή». Τα στοιχεία φτάνουν κατευθείαν στη Διεύθυνση του σχολείου, που ετοιμάζει την πρόσκληση προς τα γραφεία.</p>
+    <p class="admin-only">Επικόλλησε τον κωδικό από το email του αρχηγού, συμπλήρωσε πρωτόκολλο και ημερομηνίες και κατέβασε την πρόσκληση και το έντυπο προσφοράς σε Word.</p>
+    <div class="law">Άρθρο 23: η πρόσκληση αναρτάται στην ιστοσελίδα του σχολείου τουλάχιστον 5 εργάσιμες ημέρες πριν από τη λήξη υποβολής των προσφορών και αναγράφει υποχρεωτικά τα σημεία α έως ε.</div>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <fieldset>
+      <legend>Η μετακίνηση</legend>
+      <div class="row">
+        <div><label for="leader">Αρχηγός (ονοματεπώνυμο)</label><input type="text" id="leader" name="leader"></div>
+        <div><label for="kind">Είδος</label>
+          <select id="kind" name="kind">
+            <option>Διδακτική επίσκεψη</option>
+            <option>Εκπαιδευτική επίσκεψη</option>
+            <option>Περίπατος / εκδρομή</option>
+            <option>Συμμετοχή σε εκδήλωση ή αγώνα</option>
+          </select></div>
+      </div>
+      <label for="title">Τίτλος δράσης ή σκοπός</label>
+      <input type="text" id="title" name="title" placeholder="π.χ. Επίσκεψη στο Αρχαιολογικό Μουσείο Θεσσαλονίκης">
+    </fieldset>
+
+    <fieldset data-sec="a">
+      <legend><span class="mark" data-mark="a">α</span><span class="mark" data-mark="b">β</span>Προορισμός, πρόγραμμα και διάρκεια</legend>
+      <label for="dest">Προορισμός</label>
+      <input type="text" id="dest" name="dest" placeholder="π.χ. Θεσσαλονίκη – Αρχαιολογικό Μουσείο">
+      <div class="row">
+        <div><label for="date">Ημερομηνία</label><input type="date" id="date" name="date"></div>
+        <div><label for="depPlace">Σημείο αναχώρησης</label><input type="text" id="depPlace" name="depPlace" value="Από το σχολείο"></div>
+        <div><label for="depTime">Ώρα αναχώρησης</label><span data-tp="depTime" data-value=""></span></div>
+      </div>
+      <label>Πρόγραμμα (στάσεις και δραστηριότητες)</label>
+      <p class="hint">Μία γραμμή για κάθε στάση. Η ώρα είναι προαιρετική.</p>
+      <div class="stops" id="stops"></div>
+      <div style="margin-top:8px"><button type="button" class="btn ghost small" id="addStop">Προσθήκη στάσης</button></div>
+      <div class="row">
+        <div><label for="retTime">Ώρα επιστροφής στο σχολείο</label><span data-tp="retTime" data-value=""></span></div>
+      </div>
+      <p class="status" id="durOut"></p>
+    </fieldset>
+
+    <fieldset data-sec="c">
+      <legend><span class="mark" data-mark="c">γ</span>Συμμετέχοντες</legend>
+      <label>Τμήματα</label>
+      <div class="checks" id="classes"></div>
+      <label for="students">Μαθητές/τριες (περίπου)</label>
+      <input type="number" min="0" id="students" name="students" style="max-width:220px">
+      <label for="teacherNames">Συνοδοί εκπαιδευτικοί, μαζί με τον/την αρχηγό (ένα όνομα σε κάθε γραμμή)</label>
+      <textarea id="teacherNames" name="teacherNames" rows="4"></textarea>
+      <p class="hint">Τα ονόματα πηγαίνουν μόνο στη Διεύθυνση του σχολείου. Στην πρόσκληση μπαίνει μόνο ο αριθμός τους.</p>
+      <p class="total" id="totalOut"></p>
+    </fieldset>
+
+    <fieldset data-sec="d">
+      <legend><span class="mark" data-mark="d">δ</span>Μέσο μετακίνησης</legend>
+      <div class="row">
+        <div><label for="buses">Αριθμός λεωφορείων</label><input type="number" min="1" id="buses" name="buses"></div>
+        <div><label for="seats">Θέσεις ανά λεωφορείο</label><input type="number" min="0" id="seats" name="seats"></div>
+      </div>
+      <p class="hint">Συμπλήρωσε μόνο αν τα ξέρεις. Αλλιώς η πρόσκληση ζητά λεωφορείο κατάλληλο για τον αριθμό των συμμετεχόντων.</p>
+    </fieldset>
+
+    <fieldset data-sec="e">
+      <legend><span class="mark" data-mark="e">ε</span>Λοιπές υπηρεσίες</legend>
+      <div class="list" id="services"></div>
+      <label for="servOther">Άλλη υπηρεσία</label>
+      <input type="text" id="servOther" name="servOther" placeholder="π.χ. εισιτήρια για την παράσταση της 11:00">
+    </fieldset>
+
+    <fieldset>
+      <legend>Σημειώσεις για τη Διεύθυνση του σχολείου</legend>
+      <p class="hint">Δεν μπαίνουν στην πρόσκληση, μόνο στο email. Μην γράφεις ονόματα μαθητών ή θέματα υγείας.</p>
+      <textarea id="notes" name="notes"></textarea>
+    </fieldset>
+
+    <details class="admin admin-only" id="admin" open>
+      <summary>Συμπληρώνει η Διεύθυνση του σχολείου</summary>
+      <label for="importCode">Φόρτωση από το email του αρχηγού</label>
+      <p class="hint">Επικόλλησε εδώ τον κωδικό που υπάρχει στο τέλος του email. Η φόρμα γεμίζει μόνη της.</p>
+      <textarea id="importCode" rows="3" placeholder="P1:…"></textarea>
+      <div style="margin-top:8px"><button type="button" class="btn small" id="importBtn">Φόρτωση κωδικού</button></div>
+
+      <h4 class="sub-h">Στοιχεία αυτής της πρόσκλησης</h4>
+      <div class="row">
+        <div><label for="protocol">Αρ. πρωτοκόλλου</label><input type="text" id="protocol" name="protocol"></div>
+        <div><label for="postDate">Ημερομηνία ανάρτησης</label><input type="date" id="postDate" name="postDate"></div>
+      </div>
+      <div class="row">
+        <div><label for="deadDate">Λήξη προσφορών (ημερομηνία)</label><input type="date" id="deadDate" name="deadDate"></div>
+        <div><label for="deadTime">Ώρα λήξης</label><span data-tp="deadTime" data-value="12:00"></span></div>
+      </div>
+      <p class="status" id="deadOut"></p>
+
+      <h4 class="sub-h">Σταθερά στοιχεία (τα γράφεις μία φορά)</h4>
+      <label for="submitHow">Τρόπος υποβολής προσφορών</label>
+      <input type="text" id="submitHow" name="submitHow" placeholder="π.χ. με email στο … ή σε κλειστό φάκελο στο γραφείο της Διεύθυνσης">
+      <div class="row">
+        <div><label for="addr">Ταχ. διεύθυνση</label><input type="text" id="addr" name="addr" value="Σαπφούς 3, Πολίχνη 565 33"></div>
+        <div><label for="phone">Τηλέφωνο</label><input type="text" id="phone" name="phone" value="2310652011, 2310587329"></div>
+      </div>
+      <div class="row">
+        <div><label for="schoolEmail">Email σχολείου</label><input type="email" id="schoolEmail" name="schoolEmail" value="3gympoli@sch.gr"></div>
+        <div><label for="site">Ιστοσελίδα</label><input type="text" id="site" name="site" value="https://blogs.sch.gr/3gympoli/"></div>
+      </div>
+      <label for="legal">Νομοθεσία</label>
+      <input type="text" id="legal" name="legal" value="άρθρο 23 της Υ.Α. 109113/ΓΔ4/19-08-2026 (Β΄ 5237)">
+      <label for="director">Ο Διευθυντής</label>
+      <input type="text" id="director" name="director" value="Δημήτριος Τσολακίδης">
+      <p class="hint">Τα στοιχεία της Διεύθυνσης μένουν αποθηκευμένα σε αυτόν τον υπολογιστή.</p>
+    </details>
+
+    <button type="button" class="btn danger" id="newForm">Νέα φόρμα</button>
+  </form>
+
+  <aside class="side" aria-label="Η πρόσκληση">
+    <div class="actions leader-only">
+      <button type="button" class="btn" id="send">Αποστολή</button>
+      <div class="sendmsg" id="sendMsg" role="status" aria-live="polite"></div>
+      <div id="fallback" hidden style="flex-basis:100%">
+        <button type="button" class="btn ghost" id="mail">Αντιγραφή για email</button>
+        <p class="hint" style="margin:6px 0 0">Μετά: άνοιξε νέο email προς <b>3gympoli@sch.gr</b>, κάνε επικόλληση (Ctrl+V) και στείλ’ το.</p>
+      </div>
+    </div>
+    <div class="checklist leader-only" id="checklist"></div>
+    <div class="actions admin-only">
+      <button type="button" class="btn ghost small" id="wordInvite">Πρόσκληση σε Word</button>
+      <button type="button" class="btn ghost small" id="wordOffer">Έντυπο προσφοράς σε Word</button>
+      <button type="button" class="btn ghost small" id="copyWeb">Αντιγραφή κειμένου για WordPress</button>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="sheet admin-only"><div class="doc" id="doc"></div></div>
+  </aside>
+</div>
+
+<script>
+(function(){
+  // Email όπου στέλνουν οι αρχηγοί (αν μείνει κενό, ο αρχηγός το συμπληρώνει στο email του)
+  const MODE = "leader";
+  document.body.classList.add(MODE);
+  const SEND_TO = "3gympoli@sch.gr";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLZ-4lxpInx-PjQg-Aa-0W1v7U5c5zHvDawcsEjhOkSV3rr0J9EusWQHsugS3skUk/exec";
+  const SCRIPT_KEY = "3gympol-metakiniseis";
+  const CLASSES=["Α1","Α2","Α3","Β1","Β2","Β3","Γ1","Γ2","Γ3","Γ4"];
+  const BUS=[
+    ["ac","Κλιματισμός"],
+    ["belts","Ζώνες ασφαλείας σε όλες τις θέσεις"],
+    ["avail","Το λεωφορείο να είναι στη διάθεση της ομάδας σε όλη τη διάρκεια της μετακίνησης"],
+    ["amea","Δυνατότητα μεταφοράς μαθητή/τριας με κινητικά προβλήματα"]
+  ];
+  const SERV=[
+    ["guide","Ξενάγηση"],
+    ["tickets","Εισιτήρια εισόδου στους χώρους επίσκεψης"],
+    ["event","Παρακολούθηση εκδήλωσης ή παράστασης"],
+    ["ins","Ασφάλιση αστικής ευθύνης και ατυχήματος μαθητών και συνοδών"]
+  ];
+  const ADMIN_KEYS=["submitHow","legal","director","schoolEmail","deadTime","addr","phone","site"];
+  const PER_INVITE=["protocol","postDate","deadDate"];
+  const $=id=>document.getElementById(id);
+  const f=$("f");
+  // ---------- ώρα με π.μ. / μ.μ. (ανεξάρτητα από τη γλώσσα του browser)
+  const pad=n=>String(n).padStart(2,"0");
+  function makeTP(span,id,val){
+    span.classList.add("tp");
+    const hid=document.createElement("input");hid.type="hidden";hid.className="tval";if(id){hid.id=id;hid.name=id;}
+    const sh=document.createElement("select"),sm=document.createElement("select"),sa=document.createElement("select");
+    sh.setAttribute("aria-label","Ώρα");sm.setAttribute("aria-label","Λεπτά");sa.setAttribute("aria-label","π.μ. ή μ.μ.");
+    sh.innerHTML=`<option value="">--</option>`+Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
+    sm.innerHTML=`<option value="">--</option>`+Array.from({length:12},(_,i)=>`<option value="${pad(i*5)}">${pad(i*5)}</option>`).join("");
+    sa.innerHTML=`<option>π.μ.</option><option>μ.μ.</option>`;
+    span.append(hid,sh,sm,sa);
+    const push=()=>{
+      if(sh.value&&!sm.value)sm.value="00";
+      if(!sh.value){hid.value="";return;}
+      const h=+sh.value%12+(sa.value==="μ.μ."?12:0);
+      hid.value=`${pad(h)}:${sm.value}`;
+    };
+    [sh,sm,sa].forEach(s=>s.addEventListener("change",push));
+    span.sync=()=>{
+      const v=hid.value;
+      if(!/^\d{2}:\d{2}$/.test(v)){sh.value="";sm.value="";sa.value="π.μ.";return;}
+      const [h,m]=v.split(":").map(Number);
+      sh.value=String(h%12||12);
+      if(![...sm.options].some(o=>o.value===pad(m)))sm.add(new Option(pad(m),pad(m)));
+      sm.value=pad(m);sa.value=h>=12?"μ.μ.":"π.μ.";
+    };
+    hid.value=val||"";span.sync();
+    return span;
+  }
+  document.querySelectorAll("span[data-tp]").forEach(sp=>makeTP(sp,sp.dataset.tp,sp.dataset.value));
+  const syncTP=()=>document.querySelectorAll(".tp").forEach(sp=>sp.sync&&sp.sync());
+
+  $("classes").innerHTML=CLASSES.map(c=>`<label class="chip"><input type="checkbox" name="cls" value="${c}"><span>${c}</span></label>`).join("");
+  const opts=(arr,name)=>arr.map(([k,t])=>`<label class="opt"><input type="checkbox" name="${name}" value="${k}"><span>${t}</span></label>`).join("");
+  $("services").innerHTML=opts(SERV,"serv");
+  const teacherList=v=>(v.teacherNames||"").split(/\n|,/).map(x=>x.trim()).filter(Boolean);
+
+  function addStop(time="",text=""){
+    const d=document.createElement("div");d.className="stop";
+    d.innerHTML=`<span></span><input type="text" aria-label="Στάση ή δραστηριότητα" placeholder="π.χ. Ξενάγηση στις αίθουσες της προϊστορίας"><button type="button" class="icon-btn" aria-label="Διαγραφή στάσης">×</button>`;
+    makeTP(d.children[0],null,time);d.children[1].value=text;
+    d.children[2].onclick=()=>{d.remove();update();};
+    $("stops").appendChild(d);
+    return d;
+  }
+  $("addStop").onclick=()=>{addStop().children[1].focus();update();};
+
+  // ---------- ημερομηνίες και αργίες
+  const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const DAYS=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
+  const parseD=v=>{if(!v)return null;const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d);};
+  const fmtD=d=>d?`${DAYS[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:"";
+  const fmtShort=d=>d?`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:"";
+  const mins=t=>{if(!t)return null;const [h,m]=t.split(":").map(Number);return h*60+m;};
+  function orthEaster(y){const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7,m=Math.floor((d+e+114)/31),day=((d+e+114)%31)+1;const j=new Date(y,m-1,day);j.setDate(j.getDate()+13);return j;}
+  const hcache={};
+  function holidays(y){
+    if(hcache[y])return hcache[y];
+    const set=new Set(["1/1","6/1","25/3","1/5","15/8","26/10","28/10","25/12","26/12"]);
+    const e=orthEaster(y);
+    [-48,-2,1,50].forEach(o=>{const d=new Date(e);d.setDate(d.getDate()+o);set.add(`${d.getDate()}/${d.getMonth()+1}`);});
+    return hcache[y]=set;
+  }
+  const isWork=d=>d.getDay()!==0&&d.getDay()!==6&&!holidays(d.getFullYear()).has(`${d.getDate()}/${d.getMonth()+1}`);
+  function addWorkdays(d,n){const x=new Date(d);let k=0;while(k<n){x.setDate(x.getDate()+1);if(isWork(x))k++;}return x;}
+
+  function read(){
+    const v={};
+    f.querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{if(el.id!=="importCode")v[el.id]=el.value.trim();});
+    v.cls=[...f.querySelectorAll("input[name=cls]:checked")].map(e=>e.value);
+    v.serv=[...f.querySelectorAll("input[name=serv]:checked")].map(e=>e.value);
+    v.stops=[...$("stops").children].map(s=>[s.querySelector(".tval").value,s.children[1].value.trim()]).filter(s=>s[1]);
+    return v;
+  }
+  function write(v,{keepAdmin=false}={}){
+    f.querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{
+      if(el.id==="importCode")return;
+      if(keepAdmin&&ADMIN_KEYS.includes(el.id))return;
+      if(v[el.id]!==undefined)el.value=v[el.id];
+    });
+    ["cls","serv"].forEach(n=>f.querySelectorAll(`input[name=${n}]`).forEach(e=>e.checked=(v[n]||[]).includes(e.value)));
+    $("stops").innerHTML="";(v.stops&&v.stops.length?v.stops:[["",""]]).forEach(s=>addStop(s[0],s[1]));
+    syncTP();
+  }
+
+  // ---------- το πρότυπο: κοινά κομμάτια για σελίδα, WordPress και Word
+  // Κάθε κείμενο είναι λίστα από «κομμάτια»: string, {b:"έντονο"} ή {m:"λείπει"}
+  function parts(v){
+    const M=(x,t)=>x?String(x):{m:t};
+    const date=parseD(v.date), post=parseD(v.postDate), dead=parseD(v.deadDate);
+    const d0=mins(v.depTime), d1=mins(v.retTime);
+    let dur="";
+    if(d0!=null&&d1!=null&&d1>d0){const m=d1-d0,h=Math.floor(m/60);dur=`${h} ώρ${h===1?"α":"ες"}${m%60?` και ${m%60}΄`:""}`;}
+    const st=+v.students||0, te=teacherList(v).length;
+    const nb=+v.buses||0, ns=+v.seats||0;
+    const busLine=nb?`${nb} λεωφορεί${nb===1?"ο":"α"}${ns?` με τουλάχιστον ${ns} θέσεις ${nb===1?"":"το καθένα"}`.trimEnd():""}`
+      :ns?`Λεωφορείο με τουλάχιστον ${ns} θέσεις`
+      :`Λεωφορείο/α κατάλληλης χωρητικότητας για ${st+te?`${st+te} άτομα`:"τους συμμετέχοντες"}`;
+    const servTxt=SERV.filter(([k])=>v.serv.includes(k)).map(([,t])=>t);
+    if(v.servOther)servTxt.push(v.servOther);
+    const kind=(v.kind||"μετακίνηση").toLowerCase();
+    const prog=[[v.depTime?{b:v.depTime+" "}:"",`Αναχώρηση ${(v.depPlace||"από το σχολείο").replace(/^Από/,"από")}`]];
+    v.stops.forEach(([t,x])=>prog.push([t?{b:t+" "}:"",x]));
+    prog.push([v.retTime?{b:v.retTime+" "}:"","Επιστροφή στο σχολείο"]);
+    const P={};
+    P.left=[["ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ"],["ΥΠΟΥΡΓΕΙΟ ΠΑΙΔΕΙΑΣ, ΘΡΗΣΚΕΥΜΑΤΩΝ ΚΑΙ ΑΘΛΗΤΙΣΜΟΥ"],["ΠΕΡΙΦΕΡΕΙΑΚΗ Δ/ΝΣΗ Π.Ε. ΚΑΙ Δ.Ε. ΚΕΝΤΡΙΚΗΣ ΜΑΚΕΔΟΝΙΑΣ"],["Δ/ΝΣΗ Δ.Ε. ΔΥΤΙΚΗΣ ΘΕΣΣΑΛΟΝΙΚΗΣ"],[{b:"3ο ΓΥΜΝΑΣΙΟ ΠΟΛΙΧΝΗΣ"}],
+      ["Ταχ. Δ/νση: ",M(v.addr,"διεύθυνση")],["Τηλ.: ",M(v.phone,"τηλέφωνο")],["Email: ",M(v.schoolEmail,"email")],["Ιστοσελίδα: ",M(v.site,"ιστοσελίδα")]];
+    P.right=[["Πολίχνη, ",post?fmtShort(post):{m:"ημερομηνία"}],["Αρ. Πρωτ.: ",M(v.protocol,"αρ. πρωτ.")],[""],[{b:"ΠΡΟΣ: "},"Τουριστικά γραφεία και επιχειρήσεις οδικών επιβατικών μεταφορών (μέσω της ιστοσελίδας του σχολείου)"]];
+    P.theme=[{b:"ΘΕΜΑ: "},`«Πρόσκληση εκδήλωσης ενδιαφέροντος για μίσθωση οχήματος για ${kind}${v.dest?` στον προορισμό «${v.dest}»`:""}${date?` την ${fmtShort(date)}`:""}»`];
+    P.intro=[`Το 3ο Γυμνάσιο Πολίχνης, σύμφωνα με το ${v.legal||"άρθρο 23 της ισχύουσας Υ.Α."}, καλεί τους ενδιαφερόμενους να υποβάλουν προσφορά για τη μίσθωση οχήματος για ${kind}${v.title?` με θέμα «${v.title}»`:""}, με τα παρακάτω στοιχεία.`];
+    P.sections=[
+      {t:"α) Προορισμός και πρόγραμμα",p:[["Προορισμός: ",M(v.dest,"προορισμός")]],l:prog},
+      {t:"β) Διάρκεια",p:[[date?`Ημερήσια μετακίνηση, ${fmtD(date)}`:{m:"ημερομηνία"},", ",v.depTime&&v.retTime?`από ${v.depTime} έως ${v.retTime}${dur?` (περίπου ${dur})`:""}`:{m:"ώρες αναχώρησης και επιστροφής"},"."]],l:[]},
+      {t:"γ) Προβλεπόμενος αριθμός συμμετεχόντων",p:[[st?`${st} μαθητές/τριες`:{m:"αριθμός μαθητών"},v.cls.length?` (τμήματα ${v.cls.join(", ")})`:""," και ",te?`${te} συνοδοί εκπαιδευτικοί`:{m:"αριθμός συνοδών"},st&&te?`, σύνολο ${st+te} άτομα`:"","."]],l:[]},
+      {t:"δ) Προδιαγραφές μέσου μετακίνησης",p:[],l:[[busLine]]},
+      {t:"ε) Λοιπές απαιτούμενες υπηρεσίες",p:servTxt.length?[]:[["Δεν απαιτούνται άλλες υπηρεσίες."]],l:servTxt.map(t=>[t])},
+      {t:"Υποβολή προσφορών",p:[["Οι προσφορές υποβάλλονται έως ",dead?`την ${fmtD(dead)}`:{m:"ημερομηνία λήξης"},v.deadTime?` και ώρα ${v.deadTime}`:"",", ",M(v.submitHow,"τρόπος υποβολής"),", συμπληρώνοντας το συνημμένο έντυπο οικονομικής προσφοράς."]],l:[]}
+    ];
+    P.director=M(v.director,"ονοματεπώνυμο");
+    P.offerTitle="ΕΝΤΥΠΟ ΟΙΚΟΝΟΜΙΚΗΣ ΠΡΟΣΦΟΡΑΣ";
+    P.offerSub=["Πρόσκληση με αρ. πρωτ. ",M(v.protocol,"αρ. πρωτ."),": ",M(v.dest,"προορισμός"),", ",date?fmtShort(date):{m:"ημερομηνία"}];
+    P.offerRows=[
+      [["Επωνυμία επιχείρησης"],""],[["ΑΦΜ / ΔΟΥ"],""],[["Διεύθυνση, τηλέφωνο, email"],""],
+      [["Αρ. Μητρώου ΜΗ.ΤΕ. ή άδειας λειτουργίας"],""],
+      [[`Αριθμός λεωφορείων και θέσεις καθενός${nb?` (ζητούνται ${nb}${ns?` × ${ns}`:""})`:""}`],""],
+      ...servTxt.map(t=>[[`Περιλαμβάνεται: ${t}`],"ΝΑΙ ☐     ΟΧΙ ☐"]),
+      [[{b:"Συνολική τιμή με ΦΠΑ (€)"}],""],[[{b:"Τιμή ανά μαθητή/τρια με ΦΠΑ (€)"}],""]
+    ];
+    P.offerEnd="Η προσφορά καλύπτει όλα τα στοιχεία α έως ε της πρόσκλησης.";
+    P.done={a:!!(v.dest&&v.stops.length),b:!!(date&&v.depTime&&v.retTime&&d1>d0),c:!!(st&&te),d:!!(nb||ns||st+te),e:servTxt.length>0};
+    P.date=date;P.post=post;P.dead=dead;
+    P.fileBase=`${(v.dest||"metakinisi").split(/[–,-]/)[0].trim()}${date?`_${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`:""}`.replace(/[\\/:*?"<>|]/g,"");
+    return P;
+  }
+
+  // HTML (προεπισκόπηση και αντιγραφή για WordPress)
+  const S={
+    td:'style="vertical-align:top;padding:0 8px 0 0"',
+    cell:'style="border:1px solid #777;padding:6px 8px;vertical-align:top"',
+    lab:'style="border:1px solid #777;padding:6px 8px;vertical-align:top;width:42%;background:#f2f4f6"'
+  };
+  function build(v,forExport,{offer=true,invite=true}={}){
+    const P=parts(v);
+    const R=arr=>arr.map(x=>typeof x==="string"?esc(x):x.b!==undefined?`<b>${esc(x.b)}</b>`:(forExport?"[…]":`<span class="empty">${esc(x.m)}</span>`)).join("");
+    let h="";
+    if(invite){
+      h+=`<table style="width:100%;border-collapse:collapse;font-size:13px;line-height:1.45"><tr><td ${S.td}>${P.left.map(R).join("<br>")}</td><td style="vertical-align:top;width:38%">${P.right.map(R).join("<br>")}</td></tr></table>`;
+      h+=`<p style="margin-top:18px">${R(P.theme)}</p><p>${R(P.intro)}</p>`;
+      P.sections.forEach(sec=>{
+        h+=`<p><b>${esc(sec.t)}</b>${sec.p.length?"<br>"+sec.p.map(R).join("<br>"):""}</p>`;
+        if(sec.l.length)h+=`<ul>${sec.l.map(x=>`<li>${R(x)}</li>`).join("")}</ul>`;
+      });
+      h+=`<p style="text-align:right;margin-top:26px">Ο Διευθυντής<br><br><br>${R([P.director])}</p>`;
+    }
+    if(offer){
+      if(invite)h+=forExport?`<p style="page-break-before:always"></p>`:`<div class="pb"></div>`;
+      h+=`<p style="text-align:center"><b>${P.offerTitle}</b><br>${R(P.offerSub)}</p>`;
+      h+=`<table style="width:100%;border-collapse:collapse;font-size:14px">${P.offerRows.map(([a,b])=>`<tr><td ${S.lab}>${R(a)}</td><td ${S.cell}>${b?esc(b):"&nbsp;"}</td></tr>`).join("")}</table>`;
+      h+=`<p>${P.offerEnd}</p><p style="text-align:right;margin-top:20px">Ημερομηνία: ……………………<br><br>Σφραγίδα και υπογραφή νόμιμου εκπροσώπου</p>`;
+    }
+    return {html:h,done:P.done,date:P.date,post:P.post,dead:P.dead};
+  }
+
+  // Word (.docx)
+  function buildDocx(v,which){
+    const D=window.docx;
+    const P=parts(v);
+    const runs=(arr,base={})=>arr.filter(x=>x!=="").map(x=>typeof x==="string"?new D.TextRun({text:x,...base}):x.b!==undefined?new D.TextRun({text:x.b,bold:true,...base}):new D.TextRun({text:"[…]",...base}));
+    const para=(arr,o={})=>new D.Paragraph({children:runs(arr,o.run||{}),alignment:o.align,spacing:{after:o.after??120,before:o.before??0}});
+    const none={style:D.BorderStyle.NONE,size:0,color:"FFFFFF"};
+    const line={style:D.BorderStyle.SINGLE,size:4,color:"777777"};
+    const kids=[];
+    if(which==="invite"){
+      const col=(lines,w)=>new D.TableCell({width:{size:w,type:D.WidthType.PERCENTAGE},borders:{top:none,bottom:none,left:none,right:none},
+        children:lines.map(l=>para(l.length?l:[" "],{after:0,run:{size:19}}))});
+      kids.push(new D.Table({width:{size:100,type:D.WidthType.PERCENTAGE},borders:{top:none,bottom:none,left:none,right:none,insideHorizontal:none,insideVertical:none},
+        rows:[new D.TableRow({children:[col(P.left,60),col(P.right,40)]})]}));
+      kids.push(para(P.theme,{before:300,after:200}));
+      kids.push(para(P.intro,{after:160}));
+      P.sections.forEach(sec=>{
+        kids.push(para([{b:sec.t}],{before:120,after:sec.p.length||sec.l.length?40:120}));
+        sec.p.forEach(p=>kids.push(para(p)));
+        sec.l.forEach(li=>kids.push(new D.Paragraph({children:runs(li),numbering:{reference:"bul",level:0},spacing:{after:40}})));
+      });
+      kids.push(para(["Ο Διευθυντής"],{align:D.AlignmentType.RIGHT,before:400,after:600}));
+      kids.push(para([P.director],{align:D.AlignmentType.RIGHT}));
+    }else{
+      kids.push(para([{b:P.offerTitle}],{align:D.AlignmentType.CENTER,after:60,run:{size:26}}));
+      kids.push(para(P.offerSub,{align:D.AlignmentType.CENTER,after:300}));
+      kids.push(new D.Table({width:{size:100,type:D.WidthType.PERCENTAGE},
+        borders:{top:line,bottom:line,left:line,right:line,insideHorizontal:line,insideVertical:line},
+        rows:P.offerRows.map(([a,b])=>new D.TableRow({height:{value:520,rule:D.HeightRule.ATLEAST},children:[
+          new D.TableCell({width:{size:45,type:D.WidthType.PERCENTAGE},shading:{fill:"F2F4F6",type:D.ShadingType.CLEAR,color:"auto"},margins:{top:80,bottom:80,left:100,right:100},children:[para(a,{after:0})]}),
+          new D.TableCell({width:{size:55,type:D.WidthType.PERCENTAGE},margins:{top:80,bottom:80,left:100,right:100},children:[para([b||" "],{after:0})]})
+        ]}))}));
+      kids.push(para([P.offerEnd],{before:240}));
+      kids.push(para(["Ημερομηνία: ……………………"],{align:D.AlignmentType.RIGHT,before:300,after:400}));
+      kids.push(para(["Σφραγίδα και υπογραφή νόμιμου εκπροσώπου"],{align:D.AlignmentType.RIGHT}));
+    }
+    const doc=new D.Document({
+      styles:{default:{document:{run:{font:"Calibri",size:22}}}},
+      numbering:{config:[{reference:"bul",levels:[{level:0,format:D.LevelFormat.BULLET,text:"•",alignment:D.AlignmentType.LEFT,style:{paragraph:{indent:{left:500,hanging:260}}}}]}]},
+      sections:[{properties:{page:{margin:{top:1000,bottom:1000,left:1100,right:1100}}},children:kids}]
+    });
+    return {doc,name:`${which==="invite"?"Prosklisi":"Entypo_prosforas"}_${P.fileBase}.docx`};
+  }
+
+  // ---------- κωδικός μεταφοράς (αρχηγός → Διεύθυνση)
+  const b64u={
+    enc:u8=>{let s="";u8.forEach(b=>s+=String.fromCharCode(b));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");},
+    dec:t=>{t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const s=atob(t);return Uint8Array.from(s,c=>c.charCodeAt(0));}
+  };
+  async function encode(v){
+    const data={};Object.keys(v).forEach(k=>{if(!ADMIN_KEYS.includes(k)&&!PER_INVITE.includes(k))data[k]=v[k];});
+    const raw=new TextEncoder().encode(JSON.stringify(data));
+    if(window.CompressionStream){
+      const buf=await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer();
+      return "P1:"+b64u.enc(new Uint8Array(buf));
+    }
+    return "P0:"+b64u.enc(raw);
+  }
+  async function decode(code){
+    code=code.replace(/\s+/g,"");
+    const m=code.match(/P([01]):([A-Za-z0-9_-]+)/);
+    if(!m)throw new Error("format");
+    let bytes=b64u.dec(m[2]);
+    if(m[1]==="1"){
+      const buf=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
+      bytes=new Uint8Array(buf);
+    }
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+
+  // ---------- ενημέρωση
+  let saveT, sentOk=false, sending=false;
+  function missing(v){
+    const need=[[v.leader,"Αρχηγός"],[v.dest,"Προορισμός"],[v.date,"Ημερομηνία"],[v.depTime,"Ώρα αναχώρησης"],[v.stops.length,"Πρόγραμμα (τουλάχιστον μία στάση)"],[v.retTime,"Ώρα επιστροφής"],[v.cls.length,"Τμήματα"],[+v.students,"Αριθμός μαθητών"],[teacherList(v).length,"Συνοδοί εκπαιδευτικοί"]];
+    return need.filter(([x])=>!x).map(([,t])=>t);
+  }
+  function update(){
+    const v=read();
+    const r=build(v,false);
+    $("doc").innerHTML=r.html;
+    Object.entries(r.done).forEach(([k,ok])=>document.querySelector(`[data-mark=${k}]`).classList.toggle("done",ok));
+    const st=+v.students||0, te=teacherList(v).length;
+    $("totalOut").textContent=st||te?`${te} συνοδοί · σύνολο ${st+te} άτομα`:"";
+    const d0=mins(v.depTime),d1=mins(v.retTime),dur=$("durOut");
+    if(d0!=null&&d1!=null){
+      if(d1<=d0){dur.textContent="Η ώρα επιστροφής πρέπει να είναι μετά την ώρα αναχώρησης.";dur.className="status bad";}
+      else{dur.textContent=`Διάρκεια περίπου ${Math.floor((d1-d0)/60)} ώρες${(d1-d0)%60?` και ${(d1-d0)%60} λεπτά`:""}.`;dur.className="status good";}
+    }else dur.textContent="";
+    const dd=$("deadOut");
+    if(r.post){
+      const min=addWorkdays(r.post,5);
+      if(r.dead&&r.dead<min){dd.textContent=`Η λήξη είναι νωρίς. Με ανάρτηση ${fmtShort(r.post)}, η λήξη πρέπει να είναι από ${fmtD(min)} και μετά.`;dd.className="status bad";}
+      else if(r.dead&&!isWork(r.dead)){dd.textContent=`Η ${fmtD(r.dead)} δεν είναι εργάσιμη. Διάλεξε εργάσιμη ημέρα για τη λήξη.`;dd.className="status bad";}
+      else if(r.dead&&r.date&&r.dead>=r.date){dd.textContent="Η λήξη πρέπει να είναι πριν από την ημερομηνία της μετακίνησης.";dd.className="status bad";}
+      else{dd.textContent=`Νωρίτερη λήξη: ${fmtD(min)} (5 εργάσιμες μετά την ανάρτηση, χωρίς Σαββατοκύριακα και αργίες, μαζί με την 26/10).`;dd.className="status good";}
+    }else{dd.textContent="Βάλε ημερομηνία ανάρτησης για να βγει η νωρίτερη επιτρεπτή λήξη.";dd.className="status";}
+    if(MODE==="leader"){
+      const miss=missing(v);
+      $("checklist").innerHTML=miss.length?`<h2>Λείπουν ακόμα</h2><ul>${miss.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:`<p class="ok">Όλα έτοιμα. Πάτα «Αποστολή».</p>`;
+      if(sentOk){sentOk=false;$("send").disabled=false;$("send").textContent="Αποστολή";$("sendMsg").textContent="";}
+    }
+    clearTimeout(saveT);saveT=setTimeout(()=>save(v),400);
+  }
+  function save(v){
+    try{
+      localStorage.setItem("prosklisi-draft",JSON.stringify(v));
+      const a={};ADMIN_KEYS.forEach(k=>a[k]=v[k]);localStorage.setItem("prosklisi-admin",JSON.stringify(a));
+    }catch(e){}
+  }
+  function load(){
+    let v=null,a=null;
+    try{v=JSON.parse(localStorage.getItem("prosklisi-draft")||"null");a=JSON.parse(localStorage.getItem("prosklisi-admin")||"null");}catch(e){}
+    if(v)write(v);else addStop();
+    if(a)ADMIN_KEYS.forEach(k=>{if(a[k])$(k).value=a[k];});
+    syncTP();
+  }
+
+  // ---------- κουμπιά
+  const toast=t=>{$("toast").textContent=t;setTimeout(()=>{if($("toast").textContent===t)$("toast").textContent="";},5000);};
+  async function copyRich(html,text){
+    try{
+      await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([text],{type:"text/plain"})})]);
+      return true;
+    }catch(e){
+      const box=document.createElement("div");box.innerHTML=html;box.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(box);
+      const r=document.createRange();r.selectNodeContents(box);const s=getSelection();s.removeAllRanges();s.addRange(r);
+      let ok=false;try{ok=document.execCommand("copy");}catch(_){}
+      s.removeAllRanges();box.remove();return ok;
+    }
+  }
+  $("copyWeb").onclick=async()=>{
+    const html=build(read(),true).html;
+    const tmp=document.createElement("div");tmp.innerHTML=html;
+    const ok=await copyRich(html,tmp.innerText);
+    toast(ok?"Αντιγράφηκε. Κάνε επικόλληση στο άρθρο του WordPress ή σε έγγραφο Word.":"Η αντιγραφή δεν επιτράπηκε. Επίλεξε το κείμενο της πρόσκλησης και πάτα Ctrl+C.");
+  };
+  async function message(){
+    const v=read();
+    const date=parseD(v.date);
+    const code=await encode(v);
+    const subj=`Μετακίνηση: ${v.title||v.dest||"νέα μετακίνηση"}${date?` (${fmtShort(date)})`:""}`;
+    const lines=[
+      `Αρχηγός: ${v.leader||"-"}`,
+      `Είδος: ${v.kind}`,
+      `Προορισμός: ${v.dest||"-"}`,
+      `Ημερομηνία: ${date?fmtD(date):"-"}, ${v.depTime||"?"}–${v.retTime||"?"}`,
+      `Τμήματα: ${v.cls.join(", ")||"-"}`,
+      `Μαθητές: ${v.students||"-"}`,
+      `Συνοδοί (${teacherList(v).length}): ${teacherList(v).join(", ")||"-"}`,
+      v.notes?`Σημειώσεις: ${v.notes}`:"",
+      "",
+      "Κωδικός φόρμας (επικόλληση στη φόρμα, «Συμπληρώνει η Διεύθυνση του σχολείου»):",
+      code
+    ].filter((l,i,a)=>l!==""||a[i-1]!=="");
+    return {subj,body:lines.join("\n")};
+  }
+  const setMsg=(t,cls)=>{const m=$("sendMsg");m.textContent=t;m.className="sendmsg "+(cls||"");};
+  $("send").onclick=async()=>{
+    if(sending||sentOk)return;
+    const miss=missing(read());
+    if(miss.length){setMsg(`Συμπλήρωσε πρώτα: ${miss.join(", ")}.`,"bad");return;}
+    sending=true;const btn=$("send");btn.disabled=true;btn.textContent="Αποστολή…";setMsg("");
+    try{
+      const {subj,body}=await message();
+      const ctrl=new AbortController();const tm=setTimeout(()=>ctrl.abort(),20000);
+      const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({key:SCRIPT_KEY,subject:subj,body}),signal:ctrl.signal});
+      clearTimeout(tm);
+      const out=await res.json();
+      if(!out.ok)throw new Error(out.error||"send");
+      sentOk=true;btn.textContent="Στάλθηκε ✓";
+      setMsg("Η φόρμα στάλθηκε στη Διεύθυνση του σχολείου. Για νέα μετακίνηση πάτα «Νέα φόρμα».","ok");
+      $("fallback").hidden=true;
+    }catch(e){
+      btn.disabled=false;btn.textContent="Αποστολή";
+      setMsg("Η αποστολή δεν έγινε. Στείλε τη φόρμα με email από το κουμπί παρακάτω.","bad");
+      $("fallback").hidden=false;
+    }finally{sending=false;}
+  };
+  $("mail").onclick=async()=>{
+    const {subj,body:b}=await message();
+    const body=`Θέμα: ${subj}\n\n`+b;
+    const ok=await copyRich(esc(body).replace(/\n/g,"<br>"),body);
+    toast(ok?`Αντιγράφηκε. Άνοιξε νέο email προς ${SEND_TO}, κάνε επικόλληση και στείλ’ το.`:"Η αντιγραφή δεν επιτράπηκε από τον browser. Δοκίμασε ξανά ή άλλον browser.");
+  };
+  let dl=null;
+  async function saveWord(which){
+    if(!window.docx){toast("Το Word δεν φόρτωσε. Έλεγξε τη σύνδεση και ξαναδοκίμασε.");return;}
+    const {doc,name}=buildDocx(read(),which);
+    const blob=await window.docx.Packer.toBlob(doc);
+    if(dl){
+      try{await dl.save({filename:name,data:blob});toast(`Αποθηκεύτηκε: ${name}`);}
+      catch(e){if(e&&e.code!=="declined")toast("Η αποθήκευση δεν έγινε. Ξαναδοκίμασε σε λίγο.");}
+      return;
+    }
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);toast(`Κατέβηκε: ${name}`);
+  }
+  $("wordInvite").onclick=()=>saveWord("invite");
+  $("wordOffer").onclick=()=>saveWord("offer");
+  if(window.claude&&window.claude.use){
+    window.claude.use("downloads").then(x=>{dl=x;}).catch(()=>{});
+  }
+  $("importBtn").onclick=async()=>{
+    try{
+      const v=await decode($("importCode").value);
+      write(v,{keepAdmin:true});PER_INVITE.forEach(k=>$(k).value="");
+      $("importCode").value="";update();toast("Η φόρμα γέμισε με τα στοιχεία του αρχηγού. Συμπλήρωσε πρωτόκολλο και ημερομηνίες.");
+      $("protocol").focus();
+    }catch(e){toast("Ο κωδικός δεν διαβάστηκε. Αντέγραψε ολόκληρη τη γραμμή που ξεκινά με P1: ή P0:.");}
+  };
+  $("newForm").onclick=()=>{
+    const keep={};ADMIN_KEYS.forEach(k=>keep[k]=$(k).value);
+    HTMLFormElement.prototype.reset.call(f);Object.entries(keep).forEach(([k,x])=>$(k).value=x);
+    sentOk=false;$("send").disabled=false;$("send").textContent="Αποστολή";setMsg("");$("fallback").hidden=true;
+    $("importCode").value="";$("depTime").value="";$("retTime").value="";syncTP();
+    try{localStorage.removeItem("prosklisi-draft");}catch(e){}
+    $("stops").innerHTML="";addStop();update();
+    window.scrollTo({top:0,behavior:"smooth"});toast("Η φόρμα καθάρισε.");
+  };
+
+  f.addEventListener("input",e=>{if(e.target.id!=="importCode")update();});
+  f.addEventListener("change",e=>{if(e.target.id!=="importCode")update();});
+  load();update();
+})();
+</script>
+</body>
+</html>
