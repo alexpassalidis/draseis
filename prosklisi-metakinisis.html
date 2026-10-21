@@ -572,17 +572,33 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     const date=parseD(v.date);
     const code=await encode(v);
     const subj=`Μετακίνηση: ${v.title||v.dest||"νέα μετακίνηση"}${date?` (${fmtShort(date)})`:""}`;
+    const tl=teacherList(v);
+    const serv=SERV.filter(([k])=>v.serv.includes(k)).map(([,t])=>t);
+    if(v.servOther)serv.push(v.servOther);
+    const nb=+v.buses||0, ns=+v.seats||0;
     const lines=[
+      "ΣΤΟΙΧΕΙΑ ΜΕΤΑΚΙΝΗΣΗΣ",
+      "",
       `Αρχηγός: ${v.leader||"-"}`,
       `Είδος: ${v.kind}`,
+      v.title?`Τίτλος: ${v.title}`:"",
       `Προορισμός: ${v.dest||"-"}`,
-      `Ημερομηνία: ${date?fmtD(date):"-"}, ${v.depTime||"?"}–${v.retTime||"?"}`,
+      `Ημερομηνία: ${date?fmtD(date):"-"}`,
+      "",
+      "Πρόγραμμα:",
+      `  ${v.depTime||"--:--"}  Αναχώρηση ${(v.depPlace||"από το σχολείο").replace(/^Από/,"από")}`,
+      ...v.stops.map(([t,x])=>`  ${t||"     "}  ${x}`),
+      `  ${v.retTime||"--:--"}  Επιστροφή στο σχολείο`,
+      "",
       `Τμήματα: ${v.cls.join(", ")||"-"}`,
       `Μαθητές: ${v.students||"-"}`,
-      `Συνοδοί (${teacherList(v).length}): ${teacherList(v).join(", ")||"-"}`,
+      `Συνοδοί (${tl.length}): ${tl.join(", ")||"-"}`,
+      `Λεωφορεία: ${nb||ns?`${nb||"?"}${ns?` × ${ns} θέσεις`:""}`:"όπως χρειάζεται για τον αριθμό των ατόμων"}`,
+      `Υπηρεσίες: ${serv.join(", ")||"καμία"}`,
       v.notes?`Σημειώσεις: ${v.notes}`:"",
       "",
-      "Κωδικός φόρμας (επικόλληση στη φόρμα, «Συμπληρώνει η Διεύθυνση του σχολείου»):",
+      "----------",
+      "Κωδικός για τη Διεύθυνση του σχολείου (δεν χρειάζεται να κάνετε κάτι με αυτόν):",
       code
     ].filter((l,i,a)=>l!==""||a[i-1]!=="");
     return {subj,body:lines.join("\n")};
