@@ -105,9 +105,24 @@
   .ev.today{border-color:var(--blue);box-shadow:0 0 0 2px rgba(31,92,139,.18)}
   .flag{
     display:inline-block;font-size:11.5px;font-weight:700;color:#fff;background:var(--blue);
-    padding:2px 8px;border-radius:5px;margin-bottom:6px;
+    padding:2px 8px;border-radius:5px;margin-bottom:6px; 
   }
   .flag.next{background:#E4761F}
+
+  /* --- Δράσεις χωρίς σίγουρη ημερομηνία: πιο αχνές και μικρότερες --- */
+  .badge.tent{background:transparent;color:var(--muted);border:1px dashed #9AAAB7;font-weight:600}
+  .mbtn[aria-pressed="true"] .badge.tent{background:transparent;color:#fff;border-color:rgba(255,255,255,.7)}
+  .tent-box{margin-top:22px;padding-top:12px;border-top:1px dashed #B4C3CF}
+  .tent-h{font-size:14px;font-weight:600;color:var(--muted);margin:0;text-transform:uppercase;letter-spacing:.04em}
+  .tent-sub{font-size:13px;color:var(--muted);margin:2px 0 10px}
+  .tent-ev{
+    background:transparent;border:1px dashed #B4C3CF;border-left:4px solid;
+    border-radius:10px;padding:9px 13px;margin-bottom:8px;color:#3A4A57;
+  }
+  .tent-when{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .tent-title{font-size:15px;font-weight:500;line-height:1.3;margin-top:1px;overflow-wrap:break-word}
+  .tent-meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px 9px;align-items:center;font-size:12.5px;color:var(--muted)}
+  .cls.small{font-size:12px;padding:1px 8px;border-width:1px;color:#3A4A57;border-color:#8496A5;background:transparent}
 
   /* --- Αργίες: διακριτικές, σε μία γραμμή --- */
   .off{
@@ -181,6 +196,10 @@ const SHEET = "ΔΡΑΣΕΙΣ";        // το φύλλο με τα δεδομέ
 // Μόνο αυτές οι κατηγορίες μετριούνται και εμφανίζονται ως "δράσεις".
 // Ό,τι άλλο (αργίες, εορτές, ορόσημα κ.λπ.) μπαίνει διακριτικά στο τέλος του μήνα.
 const ACTIONS = ["Εκδρομή / Επίσκεψη / Περίπατος", "Δράση / Πρόγραμμα / Όμιλος"];
+// Δράσεις χωρίς σίγουρη ημερομηνία: όσες έχουν ΣΗΜΕΙΩΣΕΙΣ που αρχίζουν με «Ενδεικτικά».
+// Δεν γίνονται ποτέ «Επόμενη δράση» και εμφανίζονται χωριστά, στο τέλος του μήνα.
+// Μόλις κλειδώσει η ημερομηνία: σωστή ημερομηνία στη στήλη Α και σβήσιμο του «Ενδεικτικά…».
+const TENTATIVE = /^\s*Ενδεικτικ/i;
 // ---------------------------------------------------------------------------
 
 const MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος",
@@ -204,6 +223,8 @@ const pad = n => String(n).padStart(2,"0");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const val = v => (v===null||v===undefined) ? "" : String(v).trim();
 const isQuiet = cat => ACTIONS.indexOf(cat) === -1;
+const isSure  = it => !isQuiet(it.cat) && !it.tent;
+const isTent  = it => !isQuiet(it.cat) && it.tent;
 
 let months = {}, keys = [], active = null, onlyActions = false, nextKey = null, usedCats = [];
 
@@ -256,6 +277,7 @@ function build(data){
       classes:val(r["ΤΑΞΕΙΣ / ΤΜΗΜΑΤΑ"]), who:val(r["ΥΠΕΥΘΥΝΟΣ"]), note:val(r["ΣΗΜΕΙΩΣΕΙΣ"]),
       key: d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())
     };
+    item.tent = TENTATIVE.test(item.note);
     (months[mk] = months[mk] || []).push(item);
     if (item.cat) cats[item.cat] = true;
   });
@@ -265,10 +287,11 @@ function build(data){
   keys.forEach(k => months[k].sort((a,b) => a.date - b.date));
   usedCats = Object.keys(cats);
 
-  // Η επόμενη πραγματική δράση από σήμερα
+  // Η επόμενη πραγματική δράση από σήμερα — μόνο με σίγουρη ημερομηνία
   const today = new Date(); today.setHours(0,0,0,0);
+  nextKey = null;
   outer: for (const k of keys) for (const it of months[k])
-    if (!isQuiet(it.cat) && it.date >= today){ nextKey = it.key + "|" + it.title; break outer; }
+    if (isSure(it) && it.date >= today){ nextKey = it.key + "|" + it.title; break outer; }
 
   const y1 = +keys[0].slice(0,4), y2 = +keys[keys.length-1].slice(0,4);
   $("schoolyear").textContent = "Σχολικό έτος " + y1 + "–" + String(y2).slice(2);
@@ -278,22 +301,25 @@ function build(data){
 
   const nav = $("monthsInner"); nav.innerHTML = "";
   keys.forEach(k => {
-    const n = months[k].filter(i => !isQuiet(i.cat)).length;
+    const n = months[k].filter(isSure).length, t = months[k].filter(isTent).length;
     const b = document.createElement("button");
     b.className = "mbtn"; b.type = "button"; b.dataset.k = k;
     b.innerHTML = MSHORT[+k.slice(5)-1] + " " + k.slice(2,4) +
-      (n ? '<span class="badge">' + n + '</span>' : '<span class="none">–</span>');
+      (n ? '<span class="badge">' + n + '</span>' : (t ? '' : '<span class="none">–</span>')) +
+      (t ? '<span class="badge tent" title="Χωρίς οριστική ημερομηνία">+' + t + '</span>' : '');
     b.onclick = () => show(k);
     nav.appendChild(b);
   });
 
   const sel = $("msel"); sel.innerHTML = "";
   keys.forEach(k => {
-    const n = months[k].filter(i => !isQuiet(i.cat)).length;
+    const n = months[k].filter(isSure).length, t = months[k].filter(isTent).length;
     const o = document.createElement("option");
     o.value = k;
-    o.textContent = MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) +
-      (n ? "  (" + n + (n === 1 ? " δράση)" : " δράσεις)") : "  (—)");
+    const parts = [];
+    if (n) parts.push(n + (n === 1 ? " δράση" : " δράσεις"));
+    if (t) parts.push(t + (t === 1 ? " ενδεικτική" : " ενδεικτικές"));
+    o.textContent = MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "  (" + (parts.join(" + ") || "—") + ")";
     sel.appendChild(o);
   });
   sel.onchange = () => show(sel.value);
@@ -323,6 +349,24 @@ function evHTML(it, todayKey){
   h += '</div>';
   if (it.note) h += '<div class="note">' + esc(it.note) + '</div>';
   return h + '</div></div></article>';
+}
+
+// Δράση χωρίς σίγουρη ημερομηνία: λιτή κάρτα, χωρίς αριθμό ημέρας
+function tentHTML(it){
+  const color = COLORS[it.cat] || "#CBD5DD";
+  const segs = it.note.split("·").map(s => s.trim()).filter(Boolean);
+  const period = segs.shift().replace(/^Ενδεικτικ[άα]\s*:?\s*/i, "");
+  const rest = segs.filter(s => !/ημερομηνία.*θα ανακοινωθ/i.test(s));
+  let h = '<article class="tent-ev" style="border-left-color:' + color + '">';
+  h += '<div class="tent-when">' + (period ? "≈ " + esc(period) : "Ημερομηνία προς ανακοίνωση") + '</div>';
+  h += '<div class="tent-title">' + esc(it.title) + '</div>';
+  if (it.classes || rest.length){
+    h += '<div class="tent-meta">';
+    if (it.classes) h += '<span class="cls small">' + esc(it.classes) + '</span>';
+    if (rest.length) h += '<span>' + esc(rest.join(" · ")) + '</span>';
+    h += '</div>';
+  }
+  return h + '</article>';
 }
 
 // Ενώνει συνεχόμενες μέρες αργίας με τον ίδιο τίτλο σε μία γραμμή
@@ -355,13 +399,15 @@ function show(k){
   if (btn) btn.scrollIntoView({block:"nearest",inline:"center",behavior:"smooth"});
 
   const list = months[k] || [];
-  const acts = list.filter(i => !isQuiet(i.cat));
+  const acts = list.filter(isSure);
+  const tents = list.filter(isTent);
   const offs = mergeQuiet(list.filter(i => isQuiet(i.cat)));
   const t = new Date(), todayKey = t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate());
 
   $("counts").textContent = (acts.length
     ? acts.length + (acts.length === 1 ? " δράση" : " δράσεις")
-    : "καμία δράση αυτόν τον μήνα")
+    : "καμία δράση με οριστική ημερομηνία")
+    + (tents.length ? " · " + tents.length + (tents.length === 1 ? " ενδεικτική" : " ενδεικτικές") : "")
     + (offs.length ? " · " + offs.length + (offs.length === 1 ? " λοιπή ημερομηνία" : " λοιπές ημερομηνίες") : "");
 
   // Όλα σε ενιαία χρονολογική σειρά: δράσεις και λοιπές ημερομηνίες ανάμεικτα
@@ -370,8 +416,10 @@ function show(k){
   feed.sort((a,b) => (a.when - b.when) || (a.kind === "ev" ? -1 : 1));
 
   let html = '<h2 class="month">' + MONTHS[+k.slice(5)-1] + " " + k.slice(0,4) + "</h2>";
-  if (!feed.length){
+  if (!feed.length && !tents.length){
     html += '<div class="empty">Καμία καταχώρηση αυτόν τον μήνα.</div>';
+  } else if (!feed.length){
+    html += '<div class="empty">Καμία δράση με οριστική ημερομηνία αυτόν τον μήνα.</div>';
   } else {
     html += feed.map(f => {
       if (f.kind === "ev") return evHTML(f.it, todayKey);
@@ -383,6 +431,11 @@ function show(k){
       return '<div class="off" style="background:' + c + '3D;border-left-color:' + c + '">' +
              '<span class="when">' + when + '</span><span>' + esc(o.title) + '</span></div>';
     }).join("");
+  }
+  if (tents.length){
+    html += '<section class="tent-box"><h3 class="tent-h">Χωρίς οριστική ημερομηνία</h3>' +
+            '<p class="tent-sub">Προγραμματισμένες, η ακριβής ημέρα θα ανακοινωθεί.</p>' +
+            tents.map(tentHTML).join("") + '</section>';
   }
   $("content").innerHTML = html;
 }
