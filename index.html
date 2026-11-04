@@ -108,6 +108,13 @@
     padding:2px 8px;border-radius:5px;margin-bottom:6px; 
   }
   .flag.next{background:#E4761F}
+  .flag.cancel{background:#B3261E}
+
+  /* --- Ακυρωμένη δράση: μένει στη θέση της, αχνή και διαγραμμένη --- */
+  .ev.cancelled{background:#F3F5F7!important;border-color:#D5DDE3!important;opacity:.75}
+  .ev.cancelled .stripe{background:#B9C4CC!important}
+  .ev.cancelled .title,.ev.cancelled .time{text-decoration:line-through}
+  .ev.cancelled .time{background:#7A8A96}
 
   /* --- Δράσεις χωρίς σίγουρη ημερομηνία: πιο αχνές και μικρότερες --- */
   .badge.tent{background:transparent;color:var(--muted);border:1px dashed #9AAAB7;font-weight:600}
@@ -200,6 +207,9 @@ const ACTIONS = ["Εκδρομή / Επίσκεψη / Περίπατος", "Δρ
 // Δεν γίνονται ποτέ «Επόμενη δράση» και εμφανίζονται χωριστά, στο τέλος του μήνα.
 // Μόλις κλειδώσει η ημερομηνία: σωστή ημερομηνία στη στήλη Α και σβήσιμο του «Ενδεικτικά…».
 const TENTATIVE = /^\s*Ενδεικτικ/i;
+// Ακυρωμένες δράσεις: όσες έχουν ΣΗΜΕΙΩΣΕΙΣ που αρχίζουν με «Ακυρώθηκε».
+// Μένουν στη θέση τους, διαγραμμένες, χωρίς να μετριούνται ή να γίνονται «Επόμενη δράση».
+const CANCELLED = /^\s*Ακυρ[ώω]θηκε/i;
 // ---------------------------------------------------------------------------
 
 const MONTHS = ["Ιανουάριος","Φεβρουάριος","Μάρτιος","Απρίλιος","Μάιος","Ιούνιος",
@@ -223,8 +233,9 @@ const pad = n => String(n).padStart(2,"0");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const val = v => (v===null||v===undefined) ? "" : String(v).trim();
 const isQuiet = cat => ACTIONS.indexOf(cat) === -1;
-const isSure  = it => !isQuiet(it.cat) && !it.tent;
-const isTent  = it => !isQuiet(it.cat) && it.tent;
+const isSure  = it => !isQuiet(it.cat) && !it.tent && !it.cancel;
+const isTent  = it => !isQuiet(it.cat) && it.tent && !it.cancel;
+const isCancel = it => !isQuiet(it.cat) && it.cancel;
 
 let months = {}, keys = [], active = null, onlyActions = false, nextKey = null, usedCats = [];
 
@@ -278,6 +289,7 @@ function build(data){
       key: d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())
     };
     item.tent = TENTATIVE.test(item.note);
+    item.cancel = CANCELLED.test(item.note);
     (months[mk] = months[mk] || []).push(item);
     if (item.cat) cats[item.cat] = true;
   });
@@ -334,12 +346,13 @@ function build(data){
 function evHTML(it, todayKey){
   const color = COLORS[it.cat] || "#CBD5DD";
   const isNext = (it.key + "|" + it.title) === nextKey;
-  let h = '<article class="ev' + (it.key === todayKey ? " today" : "") +
+  let h = '<article class="ev' + (it.key === todayKey ? " today" : "") + (it.cancel ? " cancelled" : "") +
     '" style="background:' + color + '59;border-color:' + color + '">' +
     '<div class="stripe" style="background:' + color + '"></div><div class="ev-body">' +
     '<div class="datebox"><span class="dnum">' + it.date.getDate() + '</span>' +
     '<span class="dname">' + DAYS[it.date.getDay()].slice(0,3) + '</span></div><div class="main">';
-  if (it.key === todayKey) h += '<span class="flag">Σήμερα</span> ';
+  if (it.cancel) h += '<span class="flag cancel">Ακυρώθηκε</span> ';
+  else if (it.key === todayKey) h += '<span class="flag">Σήμερα</span> ';
   else if (isNext) h += '<span class="flag next">Επόμενη δράση</span> ';
   if (it.time) h += '<div><span class="time">' + esc(it.time) + '</span></div>';
   h += '<div class="title">' + esc(it.title) + '</div>';
@@ -347,7 +360,8 @@ function evHTML(it, todayKey){
   if (it.classes) h += '<span class="cls">' + esc(it.classes) + '</span>';
   if (it.cat) h += '<span class="chip" style="background:' + color + '">' + esc(it.cat) + '</span>';
   h += '</div>';
-  if (it.note) h += '<div class="note">' + esc(it.note) + '</div>';
+  const note = it.cancel ? it.note.replace(CANCELLED, "").replace(/^\s*[·:–-]?\s*/, "") : it.note;
+  if (note) h += '<div class="note">' + esc(note) + '</div>';
   return h + '</div></div></article>';
 }
 
@@ -401,6 +415,7 @@ function show(k){
   const list = months[k] || [];
   const acts = list.filter(isSure);
   const tents = list.filter(isTent);
+  const cancels = list.filter(isCancel);
   const offs = mergeQuiet(list.filter(i => isQuiet(i.cat)));
   const t = new Date(), todayKey = t.getFullYear()+"-"+pad(t.getMonth()+1)+"-"+pad(t.getDate());
 
@@ -408,10 +423,11 @@ function show(k){
     ? acts.length + (acts.length === 1 ? " δράση" : " δράσεις")
     : "καμία δράση με οριστική ημερομηνία")
     + (tents.length ? " · " + tents.length + (tents.length === 1 ? " ενδεικτική" : " ενδεικτικές") : "")
+    + (cancels.length ? " · " + cancels.length + (cancels.length === 1 ? " ακυρωμένη" : " ακυρωμένες") : "")
     + (offs.length ? " · " + offs.length + (offs.length === 1 ? " λοιπή ημερομηνία" : " λοιπές ημερομηνίες") : "");
 
   // Όλα σε ενιαία χρονολογική σειρά: δράσεις και λοιπές ημερομηνίες ανάμεικτα
-  const feed = acts.map(it => ({when:it.date, kind:"ev", it:it}));
+  const feed = acts.concat(cancels).map(it => ({when:it.date, kind:"ev", it:it}));
   if (!onlyActions) offs.forEach(o => feed.push({when:o.from, kind:"off", it:o}));
   feed.sort((a,b) => (a.when - b.when) || (a.kind === "ev" ? -1 : 1));
 
