@@ -130,6 +130,11 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       </div>
       <label for="title">Τίτλος δράσης ή σκοπός</label>
       <input type="text" id="title" name="title" placeholder="π.χ. Επίσκεψη στο Αρχαιολογικό Μουσείο Θεσσαλονίκης">
+      <label>Σύνδεση με τους στόχους της Υ.Α. (άρθρο 2 παρ. 2)</label>
+      <p class="hint">Τσέκαρε έναν ή περισσότερους.</p>
+      <div class="list" id="goals"></div>
+      <label for="goalText">Σύνδεση με το μάθημα (προαιρετικά)</label>
+      <textarea id="goalText" name="goalText" rows="2" placeholder="π.χ. Ιστορία Β΄ Γυμνασίου, ενότητα για τη Μακεδονία"></textarea>
     </fieldset>
 
     <fieldset data-sec="a">
@@ -264,6 +269,19 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     ["tickets","Εισιτήρια εισόδου στους χώρους επίσκεψης"],
     ["event","Παρακολούθηση εκδήλωσης ή παράστασης"]
   ];
+  const GOALS=[
+    ["α","Εμπλουτισμός της εκπαιδευτικής εμπειρίας και του προγράμματος σπουδών","Ο εμπλουτισμός της εκπαιδευτικής εμπειρίας και του προγράμματος σπουδών μέσω της παρατήρησης, της διερεύνησης και της συμμετοχής"],
+    ["β","Θεσμοί της δημοκρατίας, δημοκρατικό ήθος, ανθρώπινα δικαιώματα","Η γνωριμία με τους θεσμούς της δημοκρατίας, η ανάπτυξη δημοκρατικού ήθους και η εμπέδωση των αξιών των δικαιωμάτων του ανθρώπου"],
+    ["γ","Κουλτούρα ενεργού πολίτη, πρωτοβουλίες, εθελοντισμός","Η ανάπτυξη κουλτούρας ενεργού πολίτη, η ανάληψη πρωτοβουλιών και η συμμετοχή σε δράσεις εθελοντισμού"],
+    ["δ","Πολιτιστικά, ιστορικά, κοινωνικά, επιστημονικά θέματα, περιβαλλοντική συνείδηση","Η ευαισθητοποίηση σε θέματα πολιτιστικά, ιστορικά, κοινωνικά, επιστημονικά και η καλλιέργεια περιβαλλοντικής συνείδησης"],
+    ["ε","Φυσικό περιβάλλον, αειφορία, σωματική και ψυχική υγεία","Η επαφή με το φυσικό περιβάλλον, η ευαισθητοποίηση σε θέματα αειφορίας και βιωσιμότητας και η ενίσχυση της σωματικής και ψυχικής υγείας και ευεξίας"],
+    ["στ","Τοπική κοινωνία, οικονομική ζωή, επαγγέλματα","Η διασύνδεση του σχολείου με την τοπική κοινωνία και την οικονομική ζωή, η γνωριμία με τα επαγγέλματα και ο επαγγελματικός προσανατολισμός"],
+    ["ζ","Τεχνολογικές εξελίξεις και εφαρμοσμένες θετικές επιστήμες","Η βιωματική εξοικείωση με τις τεχνολογικές εξελίξεις και το σύνολο των εφαρμοσμένων θετικών επιστημών"],
+    ["η","Ξένες γλώσσες, διαπολιτισμική εκπαίδευση","Η βελτίωση των ικανοτήτων στις ξένες γλώσσες, η ενίσχυση της διαπολιτισμικής εκπαίδευσης και οι αλληλεπιδράσεις με μαθητές/τριες από διαφορετικά κράτη και πολιτισμικά περιβάλλοντα"],
+    ["θ","Κοινωνικές και επικοινωνιακές δεξιότητες","Η ανάπτυξη των κοινωνικών και επικοινωνιακών δεξιοτήτων"],
+    ["ι","Γνωστική, κοινωνική και ψυχολογική ανάπτυξη, αυτονόμηση","Η υποστήριξη της ολοκληρωμένης γνωστικής, κοινωνικής και ψυχολογικής ανάπτυξης μέσω της σταδιακής αυτονόμησης, της ανάληψης υποχρεώσεων και ευθυνών, της καλλιέργειας της ενσυναίσθησης και του σεβασμού των άλλων"],
+    ["ια","Ευκαιρίες μάθησης και προσωπικής ανάπτυξης","Η παροχή ευκαιριών μάθησης, προσωπικής ανάπτυξης και διεύρυνσης των οριζόντων και των προσδοκιών των μαθητών/τριών"]
+  ];
   const ADMIN_KEYS=["submitHow","legal","director","schoolEmail","deadTime","addr","phone","site"];
   const PER_INVITE=["protocol","postDate","deadDate"];
   const $=id=>document.getElementById(id);
@@ -303,6 +321,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
   $("classes").innerHTML=CLASSES.map(c=>`<label class="chip"><input type="checkbox" name="cls" value="${c}"><span>${c}</span></label>`).join("");
   const opts=(arr,name)=>arr.map(([k,t])=>`<label class="opt"><input type="checkbox" name="${name}" value="${k}"><span>${t}</span></label>`).join("");
   $("services").innerHTML=opts(SERV,"serv");
+  $("goals").innerHTML=opts(GOALS.map(([k,t])=>[k,`${k}. ${t}`]),"goal");
   const teacherList=v=>(v.teacherNames||"").split(/\n|,/).map(x=>x.trim()).filter(Boolean);
 
   function addStop(time="",text=""){
@@ -339,6 +358,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     f.querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{if(el.id!=="importCode")v[el.id]=el.value.trim();});
     v.cls=[...f.querySelectorAll("input[name=cls]:checked")].map(e=>e.value);
     v.serv=[...f.querySelectorAll("input[name=serv]:checked")].map(e=>e.value);
+    v.goals=[...f.querySelectorAll("input[name=goal]:checked")].map(e=>e.value);
     v.stops=[...$("stops").children].map(s=>[s.querySelector(".tval").value,s.children[1].value.trim()]).filter(s=>s[1]);
     return v;
   }
@@ -348,7 +368,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       if(keepAdmin&&ADMIN_KEYS.includes(el.id))return;
       if(v[el.id]!==undefined)el.value=v[el.id];
     });
-    ["cls","serv"].forEach(n=>f.querySelectorAll(`input[name=${n}]`).forEach(e=>e.checked=(v[n]||[]).includes(e.value)));
+    ["cls","serv","goal"].forEach(n=>f.querySelectorAll(`input[name=${n}]`).forEach(e=>e.checked=(v[n]||[]).includes(e.value)));
     $("stops").innerHTML="";(v.stops&&v.stops.length?v.stops:[["",""]]).forEach(s=>addStop(s[0],s[1]));
     syncTP();
   }
@@ -504,7 +524,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
   // ---------- ενημέρωση
   let saveT, sentOk=false, sending=false;
   function missing(v){
-    const need=[[v.leader,"Αρχηγός"],[v.dest,"Προορισμός"],[v.date,"Ημερομηνία"],[v.depTime,"Ώρα αναχώρησης"],[v.stops.length,"Πρόγραμμα (τουλάχιστον μία στάση)"],[v.retTime,"Ώρα επιστροφής"],[v.cls.length,"Τμήματα"],[+v.students,"Αριθμός μαθητών"],[teacherList(v).length,"Συνοδοί εκπαιδευτικοί"]];
+    const need=[[v.leader,"Αρχηγός"],[v.dest,"Προορισμός"],[v.date,"Ημερομηνία"],[v.depTime,"Ώρα αναχώρησης"],[v.stops.length,"Πρόγραμμα (τουλάχιστον μία στάση)"],[v.retTime,"Ώρα επιστροφής"],[v.cls.length,"Τμήματα"],[+v.students,"Αριθμός μαθητών"],[teacherList(v).length,"Συνοδοί εκπαιδευτικοί"],[v.goals.length,"Στόχοι (άρθρο 2)"]];
     return need.filter(([x])=>!x).map(([,t])=>t);
   }
   function update(){
@@ -582,6 +602,8 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       `Αρχηγός: ${v.leader||"-"}`,
       `Είδος: ${v.kind}`,
       v.title?`Τίτλος: ${v.title}`:"",
+      `Στόχοι (άρθρο 2 παρ. 2): ${v.goals.join(", ")||"-"}`,
+      v.goalText?`Σύνδεση με το μάθημα: ${v.goalText}`:"",
       `Προορισμός: ${v.dest||"-"}`,
       `Ημερομηνία: ${date?fmtD(date):"-"}`,
       "",
