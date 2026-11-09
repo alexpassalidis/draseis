@@ -172,9 +172,8 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       <legend><span class="mark" data-mark="d">δ</span>Μέσο μετακίνησης</legend>
       <div class="row">
         <div><label for="buses">Αριθμός λεωφορείων</label><input type="number" min="1" id="buses" name="buses"></div>
-        <div><label for="seats">Θέσεις ανά λεωφορείο</label><input type="number" min="0" id="seats" name="seats"></div>
       </div>
-      <p class="hint">Συμπλήρωσε μόνο αν τα ξέρεις. Αλλιώς η πρόσκληση ζητά λεωφορείο κατάλληλο για τον αριθμό των συμμετεχόντων.</p>
+      <p class="hint">Πόσα λεωφορεία χρειάζονται: 1, 2 κ.λπ.</p>
     </fieldset>
 
     <fieldset data-sec="e">
@@ -209,8 +208,6 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       <p class="status" id="deadOut"></p>
 
       <h4 class="sub-h">Σταθερά στοιχεία (τα γράφεις μία φορά)</h4>
-      <label for="submitHow">Τρόπος υποβολής προσφορών</label>
-      <input type="text" id="submitHow" name="submitHow" placeholder="π.χ. με email στο … ή σε κλειστό φάκελο στο γραφείο της Διεύθυνσης">
       <div class="row">
         <div><label for="addr">Ταχ. διεύθυνση</label><input type="text" id="addr" name="addr" value="Σαπφούς 3, Πολίχνη 565 33"></div>
         <div><label for="phone">Τηλέφωνο</label><input type="text" id="phone" name="phone" value="2310652011, 2310587329"></div>
@@ -241,7 +238,6 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     <div class="checklist leader-only" id="checklist"></div>
     <div class="actions admin-only">
       <button type="button" class="btn ghost small" id="wordInvite">Πρόσκληση σε Word</button>
-      <button type="button" class="btn ghost small" id="wordOffer">Έντυπο προσφοράς σε Word</button>
       <button type="button" class="btn ghost small" id="copyWeb">Αντιγραφή κειμένου για WordPress</button>
     </div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -282,7 +278,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     ["ι","Γνωστική, κοινωνική και ψυχολογική ανάπτυξη, αυτονόμηση","Η υποστήριξη της ολοκληρωμένης γνωστικής, κοινωνικής και ψυχολογικής ανάπτυξης μέσω της σταδιακής αυτονόμησης, της ανάληψης υποχρεώσεων και ευθυνών, της καλλιέργειας της ενσυναίσθησης και του σεβασμού των άλλων"],
     ["ια","Ευκαιρίες μάθησης και προσωπικής ανάπτυξης","Η παροχή ευκαιριών μάθησης, προσωπικής ανάπτυξης και διεύρυνσης των οριζόντων και των προσδοκιών των μαθητών/τριών"]
   ];
-  const ADMIN_KEYS=["submitHow","legal","director","schoolEmail","deadTime","addr","phone","site"];
+  const ADMIN_KEYS=["legal","director","schoolEmail","deadTime","addr","phone","site"];
   const PER_INVITE=["protocol","postDate","deadDate"];
   const $=id=>document.getElementById(id);
   const f=$("f");
@@ -339,6 +335,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
   const DAYS=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
   const parseD=v=>{if(!v)return null;const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d);};
   const fmtD=d=>d?`${DAYS[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:"";
+  const tin=d=>d&&d.getDay()===1?"τη":"την";
   const fmtShort=d=>d?`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:"";
   const mins=t=>{if(!t)return null;const [h,m]=t.split(":").map(Number);return h*60+m;};
   function orthEaster(y){const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7,m=Math.floor((d+e+114)/31),day=((d+e+114)%31)+1;const j=new Date(y,m-1,day);j.setDate(j.getDate()+13);return j;}
@@ -383,15 +380,13 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     if(d0!=null&&d1!=null&&d1>d0){const m=d1-d0,h=Math.floor(m/60);dur=`${h} ώρ${h===1?"α":"ες"}${m%60?` και ${m%60}΄`:""}`;}
     const st=+v.students||0, te=teacherList(v).length;
     const nb=+v.buses||0, ns=+v.seats||0;
-    const busLine=nb?`${nb} λεωφορεί${nb===1?"ο":"α"}${ns?` με τουλάχιστον ${ns} θέσεις ${nb===1?"":"το καθένα"}`.trimEnd():""}`
-      :ns?`Λεωφορείο με τουλάχιστον ${ns} θέσεις`
-      :`Λεωφορείο/α κατάλληλης χωρητικότητας για ${st+te?`${st+te} άτομα`:"τους συμμετέχοντες"}`;
+    const busLine=nb?`${nb} λεωφορεί${nb===1?"ο":"α"}`:{m:"αριθμός λεωφορείων"};
     const servTxt=SERV.filter(([k])=>v.serv.includes(k)).map(([,t])=>t);
     if(v.servOther)servTxt.push(v.servOther);
     const kind=(v.kind||"μετακίνηση").toLowerCase();
     const prog=[[v.depTime?{b:v.depTime+" "}:"",`Αναχώρηση ${(v.depPlace||"από το σχολείο").replace(/^Από/,"από")}`]];
     v.stops.forEach(([t,x])=>prog.push([t?{b:t+" "}:"",x]));
-    prog.push([v.retTime?{b:v.retTime+" "}:"","Επιστροφή στο σχολείο"]);
+    prog.push([v.retTime?{b:v.retTime+" "}:"","Επιστροφή – Άφιξη στο σχολείο"]);
     const P={};
     P.left=[["ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ"],["ΥΠΟΥΡΓΕΙΟ ΠΑΙΔΕΙΑΣ, ΘΡΗΣΚΕΥΜΑΤΩΝ ΚΑΙ ΑΘΛΗΤΙΣΜΟΥ"],["ΠΕΡΙΦΕΡΕΙΑΚΗ Δ/ΝΣΗ Π.Ε. ΚΑΙ Δ.Ε. ΚΕΝΤΡΙΚΗΣ ΜΑΚΕΔΟΝΙΑΣ"],["Δ/ΝΣΗ Δ.Ε. ΔΥΤΙΚΗΣ ΘΕΣΣΑΛΟΝΙΚΗΣ"],[{b:"3ο ΓΥΜΝΑΣΙΟ ΠΟΛΙΧΝΗΣ"}],
       ["Ταχ. Δ/νση: ",M(v.addr,"διεύθυνση")],["Τηλ.: ",M(v.phone,"τηλέφωνο")],["Email: ",M(v.schoolEmail,"email")],["Ιστοσελίδα: ",M(v.site,"ιστοσελίδα")]];
@@ -404,7 +399,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       {t:"γ) Προβλεπόμενος αριθμός συμμετεχόντων",p:[[st?`${st} μαθητές/τριες`:{m:"αριθμός μαθητών"},v.cls.length?` (τμήματα ${v.cls.join(", ")})`:""," και ",te?`${te} συνοδοί εκπαιδευτικοί`:{m:"αριθμός συνοδών"},st&&te?`, σύνολο ${st+te} άτομα`:"","."]],l:[]},
       {t:"δ) Προδιαγραφές μέσου μετακίνησης",p:[],l:[[busLine]]},
       {t:"ε) Λοιπές απαιτούμενες υπηρεσίες",p:servTxt.length?[]:[["Δεν απαιτούνται άλλες υπηρεσίες."]],l:servTxt.map(t=>[t])},
-      {t:"Υποβολή προσφορών",p:[["Οι προσφορές υποβάλλονται έως ",dead?`την ${fmtD(dead)}`:{m:"ημερομηνία λήξης"},v.deadTime?` και ώρα ${v.deadTime}`:"",", ",M(v.submitHow,"τρόπος υποβολής"),", συμπληρώνοντας το συνημμένο έντυπο οικονομικής προσφοράς."]],l:[]}
+      {t:"Υποβολή προσφορών",p:[["Οι προσφορές υποβάλλονται έως ",dead?`${tin(dead)} ${fmtD(dead)}`:{m:"ημερομηνία λήξης"},v.deadTime?` και ώρα ${v.deadTime}`:"","."]],l:[]}
     ];
     P.director=M(v.director,"ονοματεπώνυμο");
     P.offerTitle="ΕΝΤΥΠΟ ΟΙΚΟΝΟΜΙΚΗΣ ΠΡΟΣΦΟΡΑΣ";
@@ -429,7 +424,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     cell:'style="border:1px solid #777;padding:6px 8px;vertical-align:top"',
     lab:'style="border:1px solid #777;padding:6px 8px;vertical-align:top;width:42%;background:#f2f4f6"'
   };
-  function build(v,forExport,{offer=true,invite=true}={}){
+  function build(v,forExport,{offer=false,invite=true}={}){
     const P=parts(v);
     const R=arr=>arr.map(x=>typeof x==="string"?esc(x):x.b!==undefined?`<b>${esc(x.b)}</b>`:(forExport?"[…]":`<span class="empty">${esc(x.m)}</span>`)).join("");
     let h="";
@@ -524,7 +519,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
   // ---------- ενημέρωση
   let saveT, sentOk=false, sending=false;
   function missing(v){
-    const need=[[v.leader,"Αρχηγός"],[v.dest,"Προορισμός"],[v.date,"Ημερομηνία"],[v.depTime,"Ώρα αναχώρησης"],[v.stops.length,"Πρόγραμμα (τουλάχιστον μία στάση)"],[v.retTime,"Ώρα επιστροφής"],[v.cls.length,"Τμήματα"],[+v.students,"Αριθμός μαθητών"],[teacherList(v).length,"Συνοδοί εκπαιδευτικοί"],[v.goals.length,"Στόχοι (άρθρο 2)"]];
+    const need=[[v.leader,"Αρχηγός"],[v.dest,"Προορισμός"],[v.date,"Ημερομηνία"],[v.depTime,"Ώρα αναχώρησης"],[v.stops.length,"Πρόγραμμα (τουλάχιστον μία στάση)"],[v.retTime,"Ώρα επιστροφής"],[v.cls.length,"Τμήματα"],[+v.students,"Αριθμός μαθητών"],[teacherList(v).length,"Συνοδοί εκπαιδευτικοί"],[v.goals.length,"Στόχοι (άρθρο 2)"],[+v.buses,"Αριθμός λεωφορείων"]];
     return need.filter(([x])=>!x).map(([,t])=>t);
   }
   function update(){
@@ -615,7 +610,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       `Τμήματα: ${v.cls.join(", ")||"-"}`,
       `Μαθητές: ${v.students||"-"}`,
       `Συνοδοί (${tl.length}): ${tl.join(", ")||"-"}`,
-      `Λεωφορεία: ${nb||ns?`${nb||"?"}${ns?` × ${ns} θέσεις`:""}`:"όπως χρειάζεται για τον αριθμό των ατόμων"}`,
+      `Λεωφορεία: ${nb||"-"}`,
       `Υπηρεσίες: ${serv.join(", ")||"καμία"}`,
       v.notes?`Σημειώσεις: ${v.notes}`:"",
       "",
@@ -667,7 +662,6 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);toast(`Κατέβηκε: ${name}`);
   }
   $("wordInvite").onclick=()=>saveWord("invite");
-  $("wordOffer").onclick=()=>saveWord("offer");
   if(window.claude&&window.claude.use){
     window.claude.use("downloads").then(x=>{dl=x;}).catch(()=>{});
   }
