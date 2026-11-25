@@ -59,7 +59,9 @@ details.admin{min-width:0}
 .list .opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
 .stops{display:flex;flex-direction:column;gap:8px;margin-top:8px}
 .stop{display:grid;grid-template-columns:minmax(230px,auto) 1fr auto;gap:8px}
-.tp{display:flex;gap:4px;min-width:0}
+.tp,.dp{display:flex;gap:4px;min-width:0;align-items:center}
+.dp select{flex:1 1 0;min-width:64px;padding-left:6px;padding-right:4px}
+.dp select:last-child{flex:1.4 1 0}
 .tp select{flex:1 1 0;min-width:0;padding-left:6px;padding-right:4px}
 .tp select:last-child{flex:1.3 1 0}
 @media (max-width:560px){.stop{grid-template-columns:1fr auto}.stop .tp{grid-column:1/-1}}
@@ -141,8 +143,9 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       <legend><span class="mark" data-mark="a">α</span><span class="mark" data-mark="b">β</span>Προορισμός, πρόγραμμα και διάρκεια</legend>
       <label for="dest">Προορισμός</label>
       <input type="text" id="dest" name="dest" placeholder="π.χ. Θεσσαλονίκη – Αρχαιολογικό Μουσείο">
+      <label>Ημερομηνία (ημέρα / μήνας / έτος)</label>
+      <span data-dp="date" style="max-width:320px"></span>
       <div class="row">
-        <div><label for="date">Ημερομηνία</label><input type="date" id="date" name="date"></div>
         <div><label for="depPlace">Σημείο αναχώρησης</label><input type="text" id="depPlace" name="depPlace" value="Από το σχολείο"></div>
         <div><label for="depTime">Ώρα αναχώρησης</label><span data-tp="depTime" data-value=""></span></div>
       </div>
@@ -183,11 +186,6 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       <input type="text" id="servOther" name="servOther" placeholder="π.χ. εισιτήρια για την παράσταση της 11:00">
     </fieldset>
 
-    <fieldset>
-      <legend>Σημειώσεις για τη Διεύθυνση του σχολείου</legend>
-      <p class="hint">Δεν μπαίνουν στην πρόσκληση, μόνο στο email. Μην γράφεις ονόματα μαθητών ή θέματα υγείας.</p>
-      <textarea id="notes" name="notes"></textarea>
-    </fieldset>
 
     <details class="admin admin-only" id="admin" open>
       <summary>Συμπληρώνει η Διεύθυνση του σχολείου</summary>
@@ -199,10 +197,10 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
       <h4 class="sub-h">Στοιχεία αυτής της πρόσκλησης</h4>
       <div class="row">
         <div><label for="protocol">Αρ. πρωτοκόλλου</label><input type="text" id="protocol" name="protocol"></div>
-        <div><label for="postDate">Ημερομηνία ανάρτησης</label><input type="date" id="postDate" name="postDate"></div>
+        <div><label for="postDate">Ημερομηνία ανάρτησης</label><span data-dp="postDate"></span></div>
       </div>
       <div class="row">
-        <div><label for="deadDate">Λήξη προσφορών (ημερομηνία)</label><input type="date" id="deadDate" name="deadDate"></div>
+        <div><label for="deadDate">Λήξη προσφορών (ημερομηνία)</label><span data-dp="deadDate"></span></div>
         <div><label for="deadTime">Ώρα λήξης</label><span data-tp="deadTime" data-value="12:00"></span></div>
       </div>
       <p class="status" id="deadOut"></p>
@@ -312,7 +310,36 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     return span;
   }
   document.querySelectorAll("span[data-tp]").forEach(sp=>makeTP(sp,sp.dataset.tp,sp.dataset.value));
-  const syncTP=()=>document.querySelectorAll(".tp").forEach(sp=>sp.sync&&sp.sync());
+  // ---------- ημερομηνία ως ημέρα / μήνας / έτος
+  function makeDP(span,id,val){
+    span.classList.add("dp");
+    const hid=document.createElement("input");hid.type="hidden";hid.className="dval";if(id){hid.id=id;hid.name=id;}
+    const sd=document.createElement("select"),sm=document.createElement("select"),sy=document.createElement("select");
+    sd.setAttribute("aria-label","Ημέρα");sm.setAttribute("aria-label","Μήνας");sy.setAttribute("aria-label","Έτος");
+    const Y=new Date().getFullYear();
+    sd.innerHTML=`<option value="">ημέρα</option>`+Array.from({length:31},(_,i)=>`<option value="${pad(i+1)}">${pad(i+1)}</option>`).join("");
+    sm.innerHTML=`<option value="">μήνας</option>`+Array.from({length:12},(_,i)=>`<option value="${pad(i+1)}">${pad(i+1)}</option>`).join("");
+    sy.innerHTML=`<option value="">έτος</option>`+[Y-1,Y,Y+1,Y+2].map(y=>`<option>${y}</option>`).join("");
+    span.append(hid,sd,document.createTextNode("/"),sm,document.createTextNode("/"),sy);
+    const push=()=>{
+      if(sd.value&&sm.value&&!sy.value)sy.value=String(Y);
+      if(!(sd.value&&sm.value&&sy.value)){hid.value="";return;}
+      const last=new Date(+sy.value,+sm.value,0).getDate();
+      if(+sd.value>last)sd.value=pad(last);
+      hid.value=`${sy.value}-${sm.value}-${sd.value}`;
+    };
+    [sd,sm,sy].forEach(s=>s.addEventListener("change",push));
+    span.sync=()=>{
+      const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(hid.value);
+      if(!m){sd.value="";sm.value="";sy.value="";return;}
+      if(![...sy.options].some(o=>o.value===m[1]))sy.add(new Option(m[1],m[1]));
+      sy.value=m[1];sm.value=m[2];sd.value=m[3];
+    };
+    hid.value=val||"";span.sync();
+    return span;
+  }
+  document.querySelectorAll("span[data-dp]").forEach(sp=>makeDP(sp,sp.dataset.dp,""));
+  const syncTP=()=>document.querySelectorAll(".tp,.dp").forEach(sp=>sp.sync&&sp.sync());
 
   $("classes").innerHTML=CLASSES.map(c=>`<label class="chip"><input type="checkbox" name="cls" value="${c}"><span>${c}</span></label>`).join("");
   const opts=(arr,name)=>arr.map(([k,t])=>`<label class="opt"><input type="checkbox" name="${name}" value="${k}"><span>${t}</span></label>`).join("");
@@ -379,7 +406,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     let dur="";
     if(d0!=null&&d1!=null&&d1>d0){const m=d1-d0,h=Math.floor(m/60);dur=`${h} ώρ${h===1?"α":"ες"}${m%60?` και ${m%60}΄`:""}`;}
     const st=+v.students||0, te=teacherList(v).length;
-    const nb=+v.buses||0, ns=+v.seats||0;
+    const nb=+v.buses||0;
     const busLine=nb?`${nb} λεωφορεί${nb===1?"ο":"α"}`:{m:"αριθμός λεωφορείων"};
     const servTxt=SERV.filter(([k])=>v.serv.includes(k)).map(([,t])=>t);
     if(v.servOther)servTxt.push(v.servOther);
@@ -407,12 +434,12 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     P.offerRows=[
       [["Επωνυμία επιχείρησης"],""],[["ΑΦΜ / ΔΟΥ"],""],[["Διεύθυνση, τηλέφωνο, email"],""],
       [["Αρ. Μητρώου ΜΗ.ΤΕ. ή άδειας λειτουργίας"],""],
-      [[`Αριθμός λεωφορείων και θέσεις καθενός${nb?` (ζητούνται ${nb}${ns?` × ${ns}`:""})`:""}`],""],
+      [["Αριθμός λεωφορείων"],""],
       ...servTxt.map(t=>[[`Περιλαμβάνεται: ${t}`],"ΝΑΙ ☐     ΟΧΙ ☐"]),
       [[{b:"Συνολική τιμή με ΦΠΑ (€)"}],""],[[{b:"Τιμή ανά μαθητή/τρια με ΦΠΑ (€)"}],""]
     ];
     P.offerEnd="Η προσφορά καλύπτει όλα τα στοιχεία α έως ε της πρόσκλησης.";
-    P.done={a:!!(v.dest&&v.stops.length),b:!!(date&&v.depTime&&v.retTime&&d1>d0),c:!!(st&&te),d:!!(nb||ns||st+te),e:servTxt.length>0};
+    P.done={a:!!(v.dest&&v.stops.length),b:!!(date&&v.depTime&&v.retTime&&d1>d0),c:!!(st&&te),d:!!nb,e:servTxt.length>0};
     P.date=date;P.post=post;P.dead=dead;
     P.fileBase=`${(v.dest||"metakinisi").split(/[–,-]/)[0].trim()}${date?`_${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`:""}`.replace(/[\\/:*?"<>|]/g,"");
     return P;
@@ -590,7 +617,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     const tl=teacherList(v);
     const serv=SERV.filter(([k])=>v.serv.includes(k)).map(([,t])=>t);
     if(v.servOther)serv.push(v.servOther);
-    const nb=+v.buses||0, ns=+v.seats||0;
+    const nb=+v.buses||0;
     const lines=[
       "ΣΤΟΙΧΕΙΑ ΜΕΤΑΚΙΝΗΣΗΣ",
       "",
@@ -677,7 +704,7 @@ body.leader .admin-only,body.admin .leader-only{display:none!important}
     const keep={};ADMIN_KEYS.forEach(k=>keep[k]=$(k).value);
     HTMLFormElement.prototype.reset.call(f);Object.entries(keep).forEach(([k,x])=>$(k).value=x);
     sentOk=false;$("send").disabled=false;$("send").textContent="Αποστολή";setMsg("");$("fallback").hidden=true;
-    $("importCode").value="";$("depTime").value="";$("retTime").value="";syncTP();
+    $("importCode").value="";$("depTime").value="";$("retTime").value="";["date","postDate","deadDate"].forEach(k=>$(k).value="");syncTP();
     try{localStorage.removeItem("prosklisi-draft");}catch(e){}
     $("stops").innerHTML="";addStop();update();
     window.scrollTo({top:0,behavior:"smooth"});toast("Η φόρμα καθάρισε.");
