@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Διεύθυνση · Προσκλήσεις μετακινήσεων</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e8edf1; --surface:#ffffff; --paper:#ffffff; --ink:#1a2530; --muted:#5a6876;
+  --line:#c9d3dc; --accent:#1f5a96; --accent-ink:#ffffff; --ok:#2f7d4f; --warn:#a3341f;
+  --field:#f7f9fb; --focus:#f2b134;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141b22; --surface:#1c252e; --paper:#f4f6f8; --ink:#e3e9ef; --muted:#9aa8b5;
+    --line:#33414e; --accent:#6fa6dd; --accent-ink:#0e1820; --ok:#6cc392; --warn:#ef8a74;
+    --field:#232e39; --focus:#f2b134; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141b22; --surface:#1c252e; --paper:#f4f6f8; --ink:#e3e9ef; --muted:#9aa8b5;
+  --line:#33414e; --accent:#6fa6dd; --accent-ink:#0e1820; --ok:#6cc392; --warn:#ef8a74;
+  --field:#232e39; --focus:#f2b134; color-scheme: dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Commissioner","Segoe UI",Arial,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:1280px;margin:0 auto;padding:28px 20px 60px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+header.top{grid-column:1/-1}
+header.top h1{font-size:clamp(1.5rem,2.6vw,2.1rem);line-height:1.2;margin:0 0 6px;font-weight:700;letter-spacing:-.01em}
+header.top p{margin:0;color:var(--muted);max-width:70ch}
+.law{margin-top:14px;padding:12px 16px;border-left:4px solid var(--accent);background:var(--surface);border-radius:0 8px 8px 0;font-size:.92rem;color:var(--muted);max-width:80ch}
+form{display:flex;flex-direction:column;gap:18px}
+fieldset{margin:0;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:18px 18px 20px;min-width:0}
+legend{padding:0 8px;font-weight:700;font-size:1.05rem;display:flex;align-items:center;gap:10px}
+.mark{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:2px solid var(--line);font-family:"Noto Serif",Georgia,serif;font-weight:700;font-size:1rem;color:var(--muted);transition:background .2s,border-color .2s,color .2s}
+.mark.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.hint{color:var(--muted);font-size:.88rem;margin:2px 0 10px}
+label{display:block;font-weight:500;font-size:.93rem;margin:12px 0 4px}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=email],textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+textarea{min-height:76px;resize:vertical}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row>div{min-width:0}
+input,select,textarea,.row,.row>div{min-width:0;box-sizing:border-box}
+details.admin{min-width:0}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.row label{margin-top:8px}
+.checks{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;cursor:pointer}
+.chip span{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--field);font-size:.92rem;user-select:none}
+.chip input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chip input:focus-visible+span{outline:3px solid var(--focus);outline-offset:2px}
+.list .opt{display:flex;gap:10px;align-items:flex-start;margin:7px 0}
+.list .opt input{margin-top:4px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.stops{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.stop{display:grid;grid-template-columns:minmax(230px,auto) 1fr auto;gap:8px}
+.tp,.dp{display:flex;gap:4px;min-width:0;align-items:center}
+.dp select{flex:1 1 0;min-width:64px;padding-left:6px;padding-right:4px}
+.dp select:last-child{flex:1.4 1 0}
+.tp select{flex:1 1 0;min-width:0;padding-left:6px;padding-right:4px}
+.tp select:last-child{flex:1.3 1 0}
+@media (max-width:560px){.stop{grid-template-columns:1fr auto}.stop .tp{grid-column:1/-1}}
+.icon-btn{border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:8px;width:40px;font-size:1.2rem;cursor:pointer}
+.btn{font:inherit;font-weight:600;border-radius:9px;padding:10px 16px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:#c0392b;border-color:#c0392b;color:#fff;width:100%;padding:13px 16px;margin-top:6px}
+.btn.small{padding:6px 12px;font-size:.9rem}
+.total{margin-top:10px;font-weight:600}
+.status{font-size:.9rem;margin-top:8px}
+.status.bad{color:var(--warn)} .status.good{color:var(--ok)}
+details.admin{border:1px dashed var(--line);border-radius:12px;background:var(--surface);padding:4px 18px}
+details.admin summary{cursor:pointer;font-weight:700;padding:12px 0}
+.side{position:sticky;top:calc(16px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:12px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.drbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.drbox h2{font-size:1rem;margin:0 0 4px}
+.ddepre{white-space:pre-wrap;font:inherit;font-size:.86rem;line-height:1.45;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;max-height:280px;overflow:auto;margin:10px 0}
+#ddeBox{margin-bottom:12px}
+.drlist-head{display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.drlist-head h3{font-size:.95rem;margin:0}
+.drlist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.drlist li{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field)}
+.drlist li.past{opacity:.6}
+.drlist li{flex-wrap:wrap}
+.drlist .btns{display:flex;gap:6px}
+.drlist .edit{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:end;margin-top:6px}
+.drlist .edit label{margin:0 0 2px;font-size:.85rem}
+.drlist .edit .dp{width:230px}
+.drlist .edit .tp{width:200px}
+.drlist .when{font-weight:600;white-space:nowrap}
+.drlist .what{flex:1;min-width:0}
+.drlist .cls{color:var(--muted);font-size:.88rem}
+.drlist .muted{color:var(--muted);border:none;background:none;padding:0}
+.btn.danger-sm{background:transparent;border-color:#c0392b;color:#c0392b;padding:5px 10px;font-size:.85rem}
+.sendmsg{font-weight:600;margin-top:8px;min-height:1.2em}
+.sendmsg.ok{color:var(--ok)} .sendmsg.bad{color:var(--warn)}
+.btn[disabled]{opacity:.6;cursor:default}
+body.leader .admin-only,body.admin .leader-only{display:none!important}
+.checklist{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.checklist h2{font-size:1rem;margin:0 0 8px}
+.checklist ul{margin:0;padding-left:20px}
+.checklist .ok{color:var(--ok);font-weight:600;margin:0}
+.toast{min-height:1.4em;font-size:.92rem;color:var(--ok)}
+.sheet{background:var(--paper);color:#1a1a1a;border-radius:4px;box-shadow:0 1px 0 var(--line),0 12px 30px -18px rgba(10,30,50,.45);padding:44px 48px;max-height:calc(100vh - 160px);overflow:auto}
+.doc{font-family:"Noto Serif",Georgia,"Times New Roman",serif;font-size:15px;line-height:1.6}
+.doc h2{font-size:17px;text-align:center;margin:18px 0 4px;letter-spacing:.02em}
+.doc h3{font-size:15px;margin:16px 0 4px}
+.doc p{margin:6px 0}
+.doc ul{margin:4px 0 4px 22px;padding:0}
+.doc .head{display:flex;justify-content:space-between;gap:16px;font-size:14px}
+.doc .sub{text-align:center;font-style:italic;margin:0 0 12px}
+.doc .empty{color:#9a6b12;background:#fff3d6;padding:0 4px;border-radius:3px}
+.doc .sign{margin-top:28px;text-align:right}
+.doc table{border-collapse:collapse;width:100%}
+.doc .pb{border-top:2px dashed #b9c3cc;margin:30px 0 10px}
+.sub-h{margin:20px 0 0;font-size:1rem}
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  .side{position:static}
+  .sheet{max-height:none;padding:28px 22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Προσκλήσεις μετακινήσεων: Διεύθυνση του σχολείου</h1>
+    <p class="leader-only">Συμπλήρωσε τα στοιχεία της μετακίνησης και πάτα «Αποστολή με email». Τα στοιχεία φτάνουν στη Διεύθυνση του σχολείου, που ετοιμάζει την πρόσκληση προς τα γραφεία.</p>
+    <p class="admin-only">Επικόλλησε τον κωδικό από το email του αρχηγού, συμπλήρωσε πρωτόκολλο και ημερομηνίες και κατέβασε την πρόσκληση και το έντυπο προσφοράς σε Word.</p>
+    <div class="law">Άρθρο 23: η πρόσκληση αναρτάται στην ιστοσελίδα του σχολείου τουλάχιστον 5 εργάσιμες ημέρες πριν από τη λήξη υποβολής των προσφορών και αναγράφει υποχρεωτικά τα σημεία α έως ε.</div>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <fieldset>
+      <legend>Η μετακίνηση</legend>
+      <div class="row">
+        <div><label for="leader">Αρχηγός (ονοματεπώνυμο)</label><input type="text" id="leader" name="leader"></div>
+        <div><label for="kind">Είδος</label>
+          <select id="kind" name="kind">
+            <option>Διδακτική επίσκεψη</option>
+            <option>Ημερήσια εκπαιδευτική εκδρομή</option>
+            <option value="Εκπαιδευτική επίσκεψη">Εκπαιδευτική επίσκεψη (πρόγραμμα, όμιλος, Πρόγραμμα Σπουδών)</option>
+            <option>Σχολικός περίπατος</option>
+            <option>Συμμετοχή σε διαγωνισμό, εκδήλωση ή αγώνα</option>
+          </select></div>
+      </div>
+      <label for="title">Τίτλος δράσης ή σκοπός</label>
+      <input type="text" id="title" name="title" placeholder="π.χ. Επίσκεψη στο Αρχαιολογικό Μουσείο Θεσσαλονίκης">
+      <label>Σύνδεση με τους στόχους της Υ.Α. (άρθρο 2 παρ. 2)</label>
+      <p class="hint">Τσέκαρε έναν ή περισσότερους.</p>
+      <div class="list" id="goals"></div>
+      <label for="goalText">Σύνδεση με το μάθημα (προαιρετικά)</label>
+      <textarea id="goalText" name="goalText" rows="2" placeholder="π.χ. Ιστορία Β΄ Γυμνασίου, ενότητα για τη Μακεδονία"></textarea>
+    </fieldset>
+
+    <fieldset data-sec="a">
+      <legend><span class="mark" data-mark="a">α</span><span class="mark" data-mark="b">β</span>Προορισμός, πρόγραμμα και διάρκεια</legend>
+      <label for="dest">Προορισμός</label>
+      <input type="text" id="dest" name="dest" placeholder="π.χ. Θεσσαλονίκη – Αρχαιολογικό Μουσείο">
+      <label>Ημερομηνία (ημέρα / μήνας / έτος)</label>
+      <span data-dp="date" style="max-width:320px"></span>
+      <div class="row">
+        <div><label for="depPlace">Σημείο αναχώρησης</label><input type="text" id="depPlace" name="depPlace" value="Από το σχολείο"></div>
+        <div><label for="depTime">Ώρα αναχώρησης</label><span data-tp="depTime" data-value=""></span></div>
+      </div>
+      <label>Πρόγραμμα (στάσεις και δραστηριότητες)</label>
+      <p class="hint">Μία γραμμή για κάθε στάση. Η ώρα είναι προαιρετική.</p>
+      <div class="stops" id="stops"></div>
+      <div style="margin-top:8px"><button type="button" class="btn ghost small" id="addStop">Προσθήκη στάσης</button></div>
+      <div class="row">
+        <div><label for="retTime">Ώρα επιστροφής στο σχολείο</label><span data-tp="retTime" data-value=""></span></div>
+      </div>
+      <p class="status" id="durOut"></p>
+    </fieldset>
+
+    <fieldset data-sec="c">
+      <legend><span class="mark" data-mark="c">γ</span>Συμμετέχοντες</legend>
+      <label>Τμήματα</label>
+      <div class="checks" id="classes"></div>
+      <label for="students">Μαθητές/τριες (περίπου)</label>
+      <input type="number" min="0" id="students" name="students" style="max-width:220px">
+      <label for="teacherNames">Συνοδοί εκπαιδευτικοί, μαζί με τον/την αρχηγό (ένα όνομα σε κάθε γραμμή)</label>
+      <textarea id="teacherNames" name="teacherNames" rows="4"></textarea>
+      <p class="hint">Τα ονόματα πηγαίνουν μόνο στη Διεύθυνση του σχολείου. Στην πρόσκληση μπαίνει μόνο ο αριθμός τους.</p>
+      <p class="total" id="totalOut"></p>
+    </fieldset>
+
+    <fieldset data-sec="d">
+      <legend><span class="mark" data-mark="d">δ</span>Μέσο μετακίνησης</legend>
+      <div class="row">
+        <div><label for="buses">Αριθμός λεωφορείων</label><input type="number" min="1" id="buses" name="buses"></div>
+      </div>
+      <p class="hint">Πόσα λεωφορεία χρειάζονται: 1, 2 κ.λπ.</p>
+    </fieldset>
+
+    <fieldset data-sec="e">
+      <legend><span class="mark" data-mark="e">ε</span>Λοιπές υπηρεσίες</legend>
+      <div class="list" id="services"></div>
+      <label for="servOther">Άλλη υπηρεσία</label>
+      <input type="text" id="servOther" name="servOther" placeholder="π.χ. εισιτήρια για την παράσταση της 11:00">
+    </fieldset>
+
+
+    <details class="admin admin-only" id="admin" open>
+      <summary>Συμπληρώνει η Διεύθυνση του σχολείου</summary>
+      <label for="importCode">Φόρτωση από το email του αρχηγού</label>
+      <p class="hint">Επικόλλησε εδώ τον κωδικό που υπάρχει στο τέλος του email. Η φόρμα γεμίζει μόνη της.</p>
+      <textarea id="importCode" rows="3" placeholder="P1:…"></textarea>
+      <div style="margin-top:8px"><button type="button" class="btn small" id="importBtn">Φόρτωση κωδικού</button></div>
+
+      <h4 class="sub-h">Στοιχεία αυτής της πρόσκλησης</h4>
+      <div class="row">
+        <div><label for="protocol">Αρ. πρωτοκόλλου</label><input type="text" id="protocol" name="protocol"></div>
+        <div><label for="postDate">Ημερομηνία ανάρτησης</label><span data-dp="postDate"></span></div>
+      </div>
+      <div class="row">
+        <div><label for="deadDate">Λήξη προσφορών (ημερομηνία)</label><span data-dp="deadDate"></span></div>
+        <div><label for="deadTime">Ώρα λήξης</label><span data-tp="deadTime" data-value="12:00"></span></div>
+      </div>
+      <p class="status" id="deadOut"></p>
+      <label for="praxi">Πράξη Συλλόγου Διδασκόντων (αρ. και ημερομηνία, προαιρετικά)</label>
+      <input type="text" id="praxi" name="praxi" placeholder="π.χ. 12/05-11-2026">
+
+      <h4 class="sub-h">Σταθερά στοιχεία (τα γράφεις μία φορά)</h4>
+      <div class="row">
+        <div><label for="addr">Ταχ. διεύθυνση</label><input type="text" id="addr" name="addr" value="Σαπφούς 3, Πολίχνη 565 33"></div>
+        <div><label for="phone">Τηλέφωνο</label><input type="text" id="phone" name="phone" value="2310652011, 2310587329"></div>
+      </div>
+      <div class="row">
+        <div><label for="schoolEmail">Email σχολείου</label><input type="email" id="schoolEmail" name="schoolEmail" value="3gympoli@sch.gr"></div>
+        <div><label for="site">Ιστοσελίδα</label><input type="text" id="site" name="site" value="https://blogs.sch.gr/3gympoli/"></div>
+      </div>
+      <label for="ddeEmail">Email Δ.Δ.Ε. (για την ενημέρωση)</label>
+      <input type="email" id="ddeEmail" name="ddeEmail">
+      <label for="legal">Νομοθεσία</label>
+      <input type="text" id="legal" name="legal" value="άρθρο 23 της Υ.Α. 109113/ΓΔ4/19-08-2026 (Β΄ 5237) και το έγγραφο 132076/ΓΔ4/05-10-2026 του Υ.ΠΑΙ.Θ.Α.">
+      <label for="director">Ο Διευθυντής</label>
+      <input type="text" id="director" name="director" value="Δημήτριος Τσολακίδης">
+      <p class="hint">Τα στοιχεία της Διεύθυνσης μένουν αποθηκευμένα σε αυτόν τον υπολογιστή.</p>
+    </details>
+
+    <button type="button" class="btn danger" id="newForm">Νέα φόρμα</button>
+  </form>
+
+  <aside class="side" aria-label="Η πρόσκληση">
+    <div class="actions leader-only">
+      <button type="button" class="btn" id="mail">Αποστολή με email</button>
+    </div>
+    <div class="checklist leader-only" id="checklist"></div>
+    <div class="actions admin-only">
+      <button type="button" class="btn ghost small" id="wordInvite">Πρόσκληση σε Word</button>
+      <button type="button" class="btn ghost small" id="copyWeb">Αντιγραφή κειμένου για WordPress</button>
+    </div>
+    <div class="drbox admin-only" id="ddeBox">
+      <h2>Ενημέρωση Δ.Δ.Ε.</h2>
+      <p class="hint" style="margin:0" id="ddeDeadline"></p>
+      <pre class="ddepre" id="ddeText"></pre>
+      <div class="actions">
+        <button type="button" class="btn small" id="ddeCopy">Αντιγραφή κειμένου</button>
+        <button type="button" class="btn ghost small" id="ddeMail">Άνοιγμα email</button>
+      </div>
+      <div class="sendmsg" id="ddeMsg" role="status" aria-live="polite"></div>
+    </div>
+    <div class="drbox admin-only">
+      <h2>Σελίδα δράσεων</h2>
+      <p class="hint" style="margin:0 0 10px">Η μετακίνηση εμφανίζεται στη σελίδα δράσεων μόνο αφού πατήσεις «Έγκριση».</p>
+      <div class="actions">
+        <button type="button" class="btn small" id="drApprove">Έγκριση για τη σελίδα δράσεων</button>
+      </div>
+      <div class="sendmsg" id="drMsg" role="status" aria-live="polite"></div>
+      <div class="drlist-head"><h3>Εγκεκριμένες μετακινήσεις</h3><button type="button" class="btn ghost small" id="drRefresh">Ανανέωση</button></div>
+      <ul class="drlist" id="drList"><li class="muted">Φόρτωση…</li></ul>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="sheet admin-only"><div class="doc" id="doc"></div></div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.js"></script>
+<script>
+(function(){
+  // Email όπου στέλνουν οι αρχηγοί (αν μείνει κενό, ο αρχηγός το συμπληρώνει στο email του)
+  const MODE = "admin";
+  document.body.classList.add(MODE);
+  const SEND_TO = "3gympoli@sch.gr";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLZ-4lxpInx-PjQg-Aa-0W1v7U5c5zHvDawcsEjhOkSV3rr0J9EusWQHsugS3skUk/exec";
+  const ADMIN_KEY = "R0ADybf4KUHRcwi3IwA9LkxU";
+  const CLASSES=["Α1","Α2","Α3","Β1","Β2","Β3","Γ1","Γ2","Γ3","Γ4"];
+  const BUS=[
+    ["ac","Κλιματισμός"],
+    ["belts","Ζώνες ασφαλείας σε όλες τις θέσεις"],
+    ["avail","Το λεωφορείο να είναι στη διάθεση της ομάδας σε όλη τη διάρκεια της μετακίνησης"],
+    ["amea","Δυνατότητα μεταφοράς μαθητή/τριας με κινητικά προβλήματα"]
+  ];
+  const SERV=[
+    ["guide","Ξενάγηση"],
+    ["tickets","Εισιτήρια εισόδου στους χώρους επίσκεψης"],
+    ["event","Παρακολούθηση εκδήλωσης ή παράστασης"]
+  ];
+  const GOALS=[
+    ["α","Εμπλουτισμός της εκπαιδευτικής εμπειρίας και του προγράμματος σπουδών","Ο εμπλουτισμός της εκπαιδευτικής εμπειρίας και του προγράμματος σπουδών μέσω της παρατήρησης, της διερεύνησης και της συμμετοχής"],
+    ["β","Θεσμοί της δημοκρατίας, δημοκρατικό ήθος, ανθρώπινα δικαιώματα","Η γνωριμία με τους θεσμούς της δημοκρατίας, η ανάπτυξη δημοκρατικού ήθους και η εμπέδωση των αξιών των δικαιωμάτων του ανθρώπου"],
+    ["γ","Κουλτούρα ενεργού πολίτη, πρωτοβουλίες, εθελοντισμός","Η ανάπτυξη κουλτούρας ενεργού πολίτη, η ανάληψη πρωτοβουλιών και η συμμετοχή σε δράσεις εθελοντισμού"],
+    ["δ","Πολιτιστικά, ιστορικά, κοινωνικά, επιστημονικά θέματα, περιβαλλοντική συνείδηση","Η ευαισθητοποίηση σε θέματα πολιτιστικά, ιστορικά, κοινωνικά, επιστημονικά και η καλλιέργεια περιβαλλοντικής συνείδησης"],
+    ["ε","Φυσικό περιβάλλον, αειφορία, σωματική και ψυχική υγεία","Η επαφή με το φυσικό περιβάλλον, η ευαισθητοποίηση σε θέματα αειφορίας και βιωσιμότητας και η ενίσχυση της σωματικής και ψυχικής υγείας και ευεξίας"],
+    ["στ","Τοπική κοινωνία, οικονομική ζωή, επαγγέλματα","Η διασύνδεση του σχολείου με την τοπική κοινωνία και την οικονομική ζωή, η γνωριμία με τα επαγγέλματα και ο επαγγελματικός προσανατολισμός"],
+    ["ζ","Τεχνολογικές εξελίξεις και εφαρμοσμένες θετικές επιστήμες","Η βιωματική εξοικείωση με τις τεχνολογικές εξελίξεις και το σύνολο των εφαρμοσμένων θετικών επιστημών"],
+    ["η","Ξένες γλώσσες, διαπολιτισμική εκπαίδευση","Η βελτίωση των ικανοτήτων στις ξένες γλώσσες, η ενίσχυση της διαπολιτισμικής εκπαίδευσης και οι αλληλεπιδράσεις με μαθητές/τριες από διαφορετικά κράτη και πολιτισμικά περιβάλλοντα"],
+    ["θ","Κοινωνικές και επικοινωνιακές δεξιότητες","Η ανάπτυξη των κοινωνικών και επικοινωνιακών δεξιοτήτων"],
+    ["ι","Γνωστική, κοινωνική και ψυχολογική ανάπτυξη, αυτονόμηση","Η υποστήριξη της ολοκληρωμένης γνωστικής, κοινωνικής και ψυχολογικής ανάπτυξης μέσω της σταδιακής αυτονόμησης, της ανάληψης υποχρεώσεων και ευθυνών, της καλλιέργειας της ενσυναίσθησης και του σεβασμού των άλλων"],
+    ["ια","Ευκαιρίες μάθησης και προσωπικής ανάπτυξης","Η παροχή ευκαιριών μάθησης, προσωπικής ανάπτυξης και διεύρυνσης των οριζόντων και των προσδοκιών των μαθητών/τριών"]
+  ];
+  const ADMIN_KEYS=["ddeEmail","legal","director","schoolEmail","deadTime","addr","phone","site"];
+  const PER_INVITE=["praxi","protocol","postDate","deadDate"];
+  const $=id=>document.getElementById(id);
+  const f=$("f");
+  // ---------- ώρα με π.μ. / μ.μ. (ανεξάρτητα από τη γλώσσα του browser)
+  const pad=n=>String(n).padStart(2,"0");
+  function makeTP(span,id,val){
+    span.classList.add("tp");
+    const hid=document.createElement("input");hid.type="hidden";hid.className="tval";if(id){hid.id=id;hid.name=id;}
+    const sh=document.createElement("select"),sm=document.createElement("select"),sa=document.createElement("select");
+    sh.setAttribute("aria-label","Ώρα");sm.setAttribute("aria-label","Λεπτά");sa.setAttribute("aria-label","π.μ. ή μ.μ.");
+    sh.innerHTML=`<option value="">--</option>`+Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
+    sm.innerHTML=`<option value="">--</option>`+Array.from({length:12},(_,i)=>`<option value="${pad(i*5)}">${pad(i*5)}</option>`).join("");
+    sa.innerHTML=`<option>π.μ.</option><option>μ.μ.</option>`;
+    span.append(hid,sh,sm,sa);
+    const push=()=>{
+      if(sh.value&&!sm.value)sm.value="00";
+      if(!sh.value){hid.value="";return;}
+      const h=+sh.value%12+(sa.value==="μ.μ."?12:0);
+      hid.value=`${pad(h)}:${sm.value}`;
+    };
+    [sh,sm,sa].forEach(s=>s.addEventListener("change",push));
+    span.sync=()=>{
+      const v=hid.value;
+      if(!/^\d{2}:\d{2}$/.test(v)){sh.value="";sm.value="";sa.value="π.μ.";return;}
+      const [h,m]=v.split(":").map(Number);
+      sh.value=String(h%12||12);
+      if(![...sm.options].some(o=>o.value===pad(m)))sm.add(new Option(pad(m),pad(m)));
+      sm.value=pad(m);sa.value=h>=12?"μ.μ.":"π.μ.";
+    };
+    hid.value=val||"";span.sync();
+    return span;
+  }
+  document.querySelectorAll("span[data-tp]").forEach(sp=>makeTP(sp,sp.dataset.tp,sp.dataset.value));
+  // ---------- ημερομηνία ως ημέρα / μήνας / έτος
+  function makeDP(span,id,val){
+    span.classList.add("dp");
+    const hid=document.createElement("input");hid.type="hidden";hid.className="dval";if(id){hid.id=id;hid.name=id;}
+    const sd=document.createElement("select"),sm=document.createElement("select"),sy=document.createElement("select");
+    sd.setAttribute("aria-label","Ημέρα");sm.setAttribute("aria-label","Μήνας");sy.setAttribute("aria-label","Έτος");
+    const Y=new Date().getFullYear();
+    sd.innerHTML=`<option value="">ημέρα</option>`+Array.from({length:31},(_,i)=>`<option value="${pad(i+1)}">${pad(i+1)}</option>`).join("");
+    sm.innerHTML=`<option value="">μήνας</option>`+Array.from({length:12},(_,i)=>`<option value="${pad(i+1)}">${pad(i+1)}</option>`).join("");
+    sy.innerHTML=`<option value="">έτος</option>`+[Y-1,Y,Y+1,Y+2].map(y=>`<option>${y}</option>`).join("");
+    span.append(hid,sd,document.createTextNode("/"),sm,document.createTextNode("/"),sy);
+    const push=()=>{
+      if(sd.value&&sm.value&&!sy.value)sy.value=String(Y);
+      if(!(sd.value&&sm.value&&sy.value)){hid.value="";return;}
+      const last=new Date(+sy.value,+sm.value,0).getDate();
+      if(+sd.value>last)sd.value=pad(last);
+      hid.value=`${sy.value}-${sm.value}-${sd.value}`;
+    };
+    [sd,sm,sy].forEach(s=>s.addEventListener("change",push));
+    span.sync=()=>{
+      const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(hid.value);
+      if(!m){sd.value="";sm.value="";sy.value="";return;}
+      if(![...sy.options].some(o=>o.value===m[1]))sy.add(new Option(m[1],m[1]));
+      sy.value=m[1];sm.value=m[2];sd.value=m[3];
+    };
+    hid.value=val||"";span.sync();
+    return span;
+  }
+  document.querySelectorAll("span[data-dp]").forEach(sp=>makeDP(sp,sp.dataset.dp,""));
+  const syncTP=()=>document.querySelectorAll(".tp,.dp").forEach(sp=>sp.sync&&sp.sync());
+
+  $("classes").innerHTML=CLASSES.map(c=>`<label class="chip"><input type="checkbox" name="cls" value="${c}"><span>${c}</span></label>`).join("");
+  const opts=(arr,name)=>arr.map(([k,t])=>`<label class="opt"><input type="checkbox" name="${name}" value="${k}"><span>${t}</span></label>`).join("");
+  $("services").innerHTML=opts(SERV,"serv");
+  $("goals").innerHTML=opts(GOALS.map(([k,t])=>[k,`${k}. ${t}`]),"goal");
+  const teacherList=v=>(v.teacherNames||"").split(/\n|,/).map(x=>x.trim()).filter(Boolean);
+
+  function addStop(time="",text=""){
+    const d=document.createElement("div");d.className="stop";
+    d.innerHTML=`<span></span><input type="text" aria-label="Στάση ή δραστηριότητα" placeholder="π.χ. Ξενάγηση στις αίθουσες της προϊστορίας"><button type="button" class="icon-btn" aria-label="Διαγραφή στάσης">×</button>`;
+    makeTP(d.children[0],null,time);d.children[1].value=text;
+    d.children[2].onclick=()=>{d.remove();update();};
+    $("stops").appendChild(d);
+    return d;
+  }
+  $("addStop").onclick=()=>{addStop().children[1].focus();update();};
+
+  // ---------- ημερομηνίες και αργίες
+  const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const DAYS=["Κυριακή","Δευτέρα","Τρίτη","Τετάρτη","Πέμπτη","Παρασκευή","Σάββατο"];
+  const parseD=v=>{if(!v)return null;const [y,m,d]=v.split("-").map(Number);return new Date(y,m-1,d);};
+  const fmtD=d=>d?`${DAYS[d.getDay()]} ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:"";
+  const tin=d=>d&&d.getDay()===1?"τη":"την";
+  const fmtShort=d=>d?`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:"";
+  const mins=t=>{if(!t)return null;const [h,m]=t.split(":").map(Number);return h*60+m;};
+  function orthEaster(y){const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7,m=Math.floor((d+e+114)/31),day=((d+e+114)%31)+1;const j=new Date(y,m-1,day);j.setDate(j.getDate()+13);return j;}
+  const hcache={};
+  function holidays(y){
+    if(hcache[y])return hcache[y];
+    const set=new Set(["1/1","6/1","25/3","1/5","15/8","26/10","28/10","25/12","26/12"]);
+    const e=orthEaster(y);
+    [-48,-2,1,50].forEach(o=>{const d=new Date(e);d.setDate(d.getDate()+o);set.add(`${d.getDate()}/${d.getMonth()+1}`);});
+    return hcache[y]=set;
+  }
+  const isWork=d=>d.getDay()!==0&&d.getDay()!==6&&!holidays(d.getFullYear()).has(`${d.getDate()}/${d.getMonth()+1}`);
+  function subWorkdays(d,n){const x=new Date(d);let k=0;while(k<n){x.setDate(x.getDate()-1);if(isWork(x))k++;}return x;}
+  function addWorkdays(d,n){const x=new Date(d);let k=0;while(k<n){x.setDate(x.getDate()+1);if(isWork(x))k++;}return x;}
+
+  function read(){
+    const v={};
+    f.querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{if(el.id!=="importCode")v[el.id]=el.value.trim();});
+    v.cls=[...f.querySelectorAll("input[name=cls]:checked")].map(e=>e.value);
+    v.serv=[...f.querySelectorAll("input[name=serv]:checked")].map(e=>e.value);
+    v.goals=[...f.querySelectorAll("input[name=goal]:checked")].map(e=>e.value);
+    v.stops=[...$("stops").children].map(s=>[s.querySelector(".tval").value,s.children[1].value.trim()]).filter(s=>s[1]);
+    return v;
+  }
+  function write(v,{keepAdmin=false}={}){
+    f.querySelectorAll("input[id],select[id],textarea[id]").forEach(el=>{
+      if(el.id==="importCode")return;
+      if(keepAdmin&&ADMIN_KEYS.includes(el.id))return;
+      if(v[el.id]!==undefined)el.value=v[el.id];
+    });
+    ["cls","serv","goal"].forEach(n=>f.querySelectorAll(`input[name=${n}]`).forEach(e=>e.checked=(v[n]||[]).includes(e.value)));
+    $("stops").innerHTML="";(v.stops&&v.stops.length?v.stops:[["",""]]).forEach(s=>addStop(s[0],s[1]));
+    syncTP();
+  }
+
+  // ---------- το πρότυπο: κοινά κομμάτια για σελίδα, WordPress και Word
+  // Κάθε κείμενο είναι λίστα από «κομμάτια»: string, {b:"έντονο"} ή {m:"λείπει"}
+  function parts(v){
+    const M=(x,t)=>x?String(x):{m:t};
+    const date=parseD(v.date), post=parseD(v.postDate), dead=parseD(v.deadDate);
+    const d0=mins(v.depTime), d1=mins(v.retTime);
+    let dur="";
+    if(d0!=null&&d1!=null&&d1>d0){const m=d1-d0,h=Math.floor(m/60);dur=`${h} ώρ${h===1?"α":"ες"}${m%60?` και ${m%60}΄`:""}`;}
+    const st=+v.students||0, te=teacherList(v).length;
+    const nb=+v.buses||0;
+    const busLine=nb?`${nb} λεωφορεί${nb===1?"ο":"α"}`:{m:"αριθμός λεωφορείων"};
+    const servTxt=SERV.filter(([k])=>v.serv.includes(k)).map(([,t])=>t);
+    if(v.servOther)servTxt.push(v.servOther);
+    const kind=(v.kind||"μετακίνηση").toLowerCase();
+    const prog=[[v.depTime?{b:v.depTime+" "}:"",`Αναχώρηση ${(v.depPlace||"από το σχολείο").replace(/^Από/,"από")}`]];
+    v.stops.forEach(([t,x])=>prog.push([t?{b:t+" "}:"",x]));
+    prog.push([v.retTime?{b:v.retTime+" "}:"","Επιστροφή – Άφιξη στο σχολείο"]);
+    const P={};
+    P.left=[["ΕΛΛΗΝΙΚΗ ΔΗΜΟΚΡΑΤΙΑ"],["ΥΠΟΥΡΓΕΙΟ ΠΑΙΔΕΙΑΣ, ΘΡΗΣΚΕΥΜΑΤΩΝ ΚΑΙ ΑΘΛΗΤΙΣΜΟΥ"],["ΠΕΡΙΦΕΡΕΙΑΚΗ Δ/ΝΣΗ Π.Ε. ΚΑΙ Δ.Ε. ΚΕΝΤΡΙΚΗΣ ΜΑΚΕΔΟΝΙΑΣ"],["Δ/ΝΣΗ Δ.Ε. ΔΥΤΙΚΗΣ ΘΕΣΣΑΛΟΝΙΚΗΣ"],[{b:"3ο ΓΥΜΝΑΣΙΟ ΠΟΛΙΧΝΗΣ"}],
+      ["Ταχ. Δ/νση: ",M(v.addr,"διεύθυνση")],["Τηλ.: ",M(v.phone,"τηλέφωνο")],["Email: ",M(v.schoolEmail,"email")],["Ιστοσελίδα: ",M(v.site,"ιστοσελίδα")]];
+    P.right=[["Πολίχνη, ",post?fmtShort(post):{m:"ημερομηνία"}],["Αρ. Πρωτ.: ",M(v.protocol,"αρ. πρωτ.")],[""],[{b:"ΠΡΟΣ: "},"Τουριστικά γραφεία (μέσω της ιστοσελίδας του σχολείου)"]];
+    P.theme=[{b:"ΘΕΜΑ: "},`«Πρόσκληση εκδήλωσης ενδιαφέροντος για μίσθωση οχήματος για ${kind}${v.dest?` στον προορισμό «${v.dest}»`:""}${date?` την ${fmtShort(date)}`:""}»`];
+    P.intro=[`Το 3ο Γυμνάσιο Πολίχνης, σύμφωνα με το ${v.legal||"άρθρο 23 της ισχύουσας Υ.Α."}, καλεί τα ενδιαφερόμενα τουριστικά γραφεία που πληρούν τις προϋποθέσεις του άρθρου 22 της Υ.Α. 109113/ΓΔ4/19-08-2026 να υποβάλουν προσφορά για τη μίσθωση οχήματος για ${kind}${v.title?` με θέμα «${v.title}»`:""}, με τα παρακάτω στοιχεία.`];
+    P.sections=[
+      {t:"α) Προορισμός και πρόγραμμα",p:[["Προορισμός: ",M(v.dest,"προορισμός")]],l:prog},
+      {t:"β) Διάρκεια",p:[[date?`Ημερήσια μετακίνηση, ${fmtD(date)}`:{m:"ημερομηνία"},", ",v.depTime&&v.retTime?`από ${v.depTime} έως ${v.retTime}`:{m:"ώρες αναχώρησης και επιστροφής"},"."]],l:[]},
+      {t:"γ) Προβλεπόμενος αριθμός συμμετεχόντων",p:[[st?`${st} μαθητές/τριες`:{m:"αριθμός μαθητών"}," και ",te?`${te} συνοδοί εκπαιδευτικοί`:{m:"αριθμός συνοδών"},st&&te?`, σύνολο ${st+te} άτομα`:"","."]],l:[]},
+      {t:"δ) Προδιαγραφές μέσου μετακίνησης",p:[],l:[[busLine]]},
+      {t:"ε) Λοιπές απαιτούμενες υπηρεσίες",p:servTxt.length?[]:[["Δεν απαιτούνται άλλες υπηρεσίες."]],l:servTxt.map(t=>[t])},
+      {t:"Υποβολή προσφορών",p:[["Οι προσφορές υποβάλλονται έως ",dead?`${tin(dead)} ${fmtD(dead)}`:{m:"ημερομηνία λήξης"},v.deadTime?` και ώρα ${v.deadTime}`:"","."],["Μαζί με την προσφορά υποβάλλονται τα δικαιολογητικά της παρ. 2 του άρθρου 22 της Υ.Α. 109113/ΓΔ4/19-08-2026, εκτός αν το τουριστικό γραφείο τα έχει ήδη υποβάλει στο σχολείο κατά το τρέχον σχολικό έτος (σημείο 6 του εγγράφου 132076/ΓΔ4/05-10-2026)."],(v.kind==="Ημερήσια εκπαιδευτική εκδρομή"?["Για την υπογραφή της σύμβασης ο ανάδοχος προσκομίζει τα δικαιολογητικά της παρ. 3 του άρθρου 23 της ίδιας Υ.Α., μεταξύ των οποίων την υποχρεωτική Ασφάλιση Επαγγελματικής Αστικής Ευθύνης Διοργανωτή Ταξιδίων και πρόσθετη ασφάλιση κάλυψης εξόδων σε περίπτωση ατυχήματος ή ασθένειας των συμμετεχόντων."]:["Για την υπογραφή της σύμβασης ο ανάδοχος προσκομίζει τα δικαιολογητικά της παρ. 3 του άρθρου 23 της ίδιας Υ.Α., μεταξύ των οποίων την υποχρεωτική Ασφάλιση Επαγγελματικής Αστικής Ευθύνης Διοργανωτή Ταξιδίων. Η πρόσθετη ασφάλιση κάλυψης εξόδων σε περίπτωση ατυχήματος ή ασθένειας των συμμετεχόντων ",{b:"δεν απαιτείται"},", καθώς η δράση δεν αποτελεί ημερήσια εκπαιδευτική εκδρομή (σημείο 8 του εγγράφου 132076/ΓΔ4/05-10-2026)."]),["Προσφορές οι οποίες δεν καλύπτουν τους απαιτούμενους όρους των σχετικών Υ.Α. και εγκυκλίων (109113/ΓΔ4/19-08-2026, Β΄ 5237, και 132076/ΓΔ4/05-10-2026) θα απορρίπτονται."]],l:[]}
+    ];
+    P.director=M(v.director,"ονοματεπώνυμο");
+    P.offerTitle="ΕΝΤΥΠΟ ΟΙΚΟΝΟΜΙΚΗΣ ΠΡΟΣΦΟΡΑΣ";
+    P.offerSub=["Πρόσκληση με αρ. πρωτ. ",M(v.protocol,"αρ. πρωτ."),": ",M(v.dest,"προορισμός"),", ",date?fmtShort(date):{m:"ημερομηνία"}];
+    P.offerRows=[
+      [["Επωνυμία επιχείρησης"],""],[["ΑΦΜ / ΔΟΥ"],""],[["Διεύθυνση"],""],[["Τηλέφωνο και email"],""],
+      [["Αρ. Μητρώου ΜΗ.ΤΕ. ή άδειας λειτουργίας"],""],
+      [["Αριθμός λεωφορείων και θέσεις καθενός"],""],
+      [["Περιλαμβάνονται όλες οι υπηρεσίες του σημείου ε της πρόσκλησης"],"ΝΑΙ ☐        ΟΧΙ ☐"],
+      [[{b:"Συνολική τιμή με ΦΠΑ (€)"}],""],[[{b:"Τιμή ανά μαθητή/τρια με ΦΠΑ (€)"}],""],
+      [["Παρατηρήσεις"],""]
+    ];
+    P.progRows=[[v.depTime||"",`Αναχώρηση ${(v.depPlace||"από το σχολείο").replace(/^Από/,"από")}`],...v.stops.map(([t,x])=>[t||"",x]),[v.retTime||"","Επιστροφή – Άφιξη στο σχολείο"]];
+    P.offerEnd="Η προσφορά καλύπτει όλα τα στοιχεία α έως ε της πρόσκλησης.";
+    P.done={a:!!(v.dest&&v.stops.length),b:!!(date&&v.depTime&&v.retTime&&d1>d0),c:!!(st&&te),d:!!nb,e:servTxt.length>0};
+    P.date=date;P.post=post;P.dead=dead;
+    P.fileBase=`${(v.dest||"metakinisi").split(/[–,-]/)[0].trim()}${date?`_${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}`:""}`.replace(/[\\/:*?"<>|]/g,"");
+    return P;
+  }
+
+  // HTML (προεπισκόπηση και αντιγραφή για WordPress)
+  const S={
+    td:'style="vertical-align:top;padding:0 8px 0 0"',
+    cell:'style="border:1px solid #777;padding:6px 8px;vertical-align:top"',
+    lab:'style="border:1px solid #777;padding:6px 8px;vertical-align:top;width:42%;background:#f2f4f6"'
+  };
+  function build(v,forExport,{offer=false,invite=true}={}){
+    const P=parts(v);
+    const R=arr=>arr.map(x=>typeof x==="string"?esc(x):x.b!==undefined?`<b>${esc(x.b)}</b>`:(forExport?"[…]":`<span class="empty">${esc(x.m)}</span>`)).join("");
+    let h="";
+    if(invite){
+      h+=`<table style="width:100%;border-collapse:collapse;font-size:13px;line-height:1.45"><tr><td ${S.td}>${P.left.map(R).join("<br>")}</td><td style="vertical-align:top;width:38%">${P.right.map(R).join("<br>")}</td></tr></table>`;
+      h+=`<p style="margin-top:18px">${R(P.theme)}</p><p>${R(P.intro)}</p>`;
+      P.sections.forEach(sec=>{
+        h+=`<p><b>${esc(sec.t)}</b>${sec.p.length?"<br>"+sec.p.map(R).join("<br>"):""}</p>`;
+        if(sec.l.length)h+=`<ul>${sec.l.map(x=>`<li>${R(x)}</li>`).join("")}</ul>`;
+      });
+      h+=`<p style="text-align:right;margin-top:26px">Ο Διευθυντής<br><br><br>${R([P.director])}</p>`;
+    }
+    if(offer){
+      if(invite)h+=forExport?`<p style="page-break-before:always"></p>`:`<div class="pb"></div>`;
+      h+=`<p style="text-align:center"><b>${P.offerTitle}</b><br>${R(P.offerSub)}</p>`;
+      h+=`<table style="width:100%;border-collapse:collapse;font-size:14px">${P.offerRows.map(([a,b])=>`<tr><td ${S.lab}>${R(a)}</td><td ${S.cell}>${b?esc(b):"&nbsp;"}</td></tr>`).join("")}</table>`;
+      h+=`<p>${P.offerEnd}</p><p style="text-align:right;margin-top:20px">Ημερομηνία: ……………………<br><br>Σφραγίδα και υπογραφή νόμιμου εκπροσώπου</p>`;
+    }
+    return {html:h,done:P.done,date:P.date,post:P.post,dead:P.dead};
+  }
+
+  // Word (.docx)
+  const EMBLEM_B64="iVBORw0KGgoAAAANSUhEUgAAAHoAAAB8CAYAAACmAKT5AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAIdUAACHVAQSctJ0AAD/pSURBVHhe7Z11dBVX18afM3PvjQshwUmQQDy4O5SW4hYiaAjFi5RS2tJiLaWlaJEWSXKDxXCX4u6ahIRA8IS4J1fm7O+PCTdS+r4t0q99m99arBVm5uyZO8/MmSN77wP8i3D1Dk4p+X8Xv/UObr7BaY7dAu1Kbv9fRCi74X8N1w4R5i7egQHeX+zJI4ZTJffFbDn0lBMZfzGu6YuOY0NPd/54a6+S+/+XYGU3/FNw9YpQcZZdXyUqrfWgekYK1kAjSVWJhEoCeLVKFUzq1a1uw5u6VBZH9HRHv8928wPL+isAUFlbPT/dod/zY18xKS0PP0Vew8245LxHSblqQWI7dZDSBS5lR2/9KL5suX8S/yyhXWerXBrU2ssYdVYpBOj1EBmA+WPboGfbuiACdHoOhUKAKBT/tJ8irmLtrjs7o7aM6FffO1gdF+4/wsl3Qy9GOsXdsIAdH0yN+HHD1z0+jXucjpx8HT5sVRucE1ZEXEN6jgYDO9XDhEVHtGk5GhGcJRZy+DyI8D9b6tr+5vwjhHbxDgwQGPuhQxP7inkFWqyY1gUWpirD/r1n7qNn27qlyhy98hjnbj3H1yNbwmNwCCSiGMaovkYjNLi/bUQUOsxWuFVxSCJBUDCJBzXzqDo1+KtueJaSg4mLjuHbMW3gVse2lM2ohFSkZhTAxEikHzdfRszD9CcS8W/vho1aV+rAcv4crl5r7F38gpOmLjtOZRkyZx9JEqc791Po5r1kIiK6ejeJth6LJb9Z+yg9q4CIiLJyC8ndT03ufmpy9gvqX9K+Q59gazefYOnl/rwCrcF+6OEYajh0A+04EUdERG3HhBn2vUS99w55z9xDHn5Bmto+6yqXtF3OH8TZJzioxcjNFLIvioiI9BKnT5bLgm8+FE0S50RE9N7HEaTTS/Tl6lPUfOQmevAswyAE55w6jQ8jN98g7uoTtLDUCTrMVnj4BS8e9OVOzjmnz1efoo/mHyIiovnq89RpfDilZxfQ3MBz1H5sGE1acpQuRycS55x+3HiZiIgSnmcSEVHQ3tvUZPhGcvVa27DUOcr5zzj7BkWv333TIBgR0frdtwzirt91m4iIloVdpaYjNtLERb/S5CVHafzCI7Qk9IqhzMRFv5Krb6C+vm9g25L2nQb+4tH/y53JmTkFskEiik5IJXc/NS1QXzCUf0lugZZWb71OnkNC6FZ8MjUYGkI6vURXYxLpWXIOUdFDNeq7gzqX/pscSp6rnN/B1SdoffivMWXvNX224gQREQ2bu492noijfjN20pZD0aTV6cseSudvP6fuU7eRu5+a3AYFtylp3803eEDEsbt5kiRRXqGWHiVlkV6SiIio08QIcvdTU5/pO2j43APU97MdFDD/IIUeKb6e/efuU+NhG2jqsmMkSZx6fLKtxJmJmgVs0LuOjzAvec6/A3+rxpjL4KB2rVyqngqc2Q0AkJiai6q25li97QYca1rj4PkEPEzMwcKJ7ZCTp8OG/VHQc4KJSoB9VStMHNgI63bewk+R1yFxngctd4vZPurRS/uug9YPnuTTbM2Yfp5mqZn5yMzVolCjg++s/fB0tMXD59nIztcCAM6t9YWFWXGDT6PVIyNHg8cvsnHgXAIkTrgck4SnyblQf90NTZzlT3ShRocOE8KvXwoc2thQ+N+Km3dQatltkN+225JkqE1p5s+n6eD5BHL3U9OY7w9Tofa3by/nnHQ6ibQ6+a30GKwmV+/AKwCVeog9B2+Izs4tNBgv1OhIo9WTRqcnrU5POp1UZEdPH0zeSg2GhNCRSw+poFBHS0Ov0Jz15yj0UAwVanTEiz4hRERZuRoa8/1haj5yE8U/ldsHx648IhfvIO+S5/+X4SU2GrIhe8mWy9zJN3iAi4/azc0v6I7z4F+qAoD/NweIiOjxi2wK+PYgtQrYTBejEkmvl0WMup9CIfujyOervdQqYDPNWHmSiIjyC3U0L/AceQxWk4tX4JCyZ3X2CboXsu+ONHvdWQred4duxL2gElq9kvgnGdTcfyMtCPntN3tFxFUa+MVu+mX7DZIkiQoKdbT7VDw1HraBuk3ZStl5Gmo2YmNa2esAADffoP2uvupSI3R/BX9Z1e3mG9TLxtxk5+EVA4UBX+7G46QccKKLAmMtSKL9Eij91xUDh3h/tRe2Vqb4fFgztHSvZih/72kmjl5+hDF9PcEYAxFh58l4zFp3DgCg10sH79LBnoiMlEqc1kB976A+KlHYWXZ7nWpW8HC0RXU7C1S3NYeZiQIAIIoMkkSYG3gBuflaeDjawtbaBB97NUKtqlaG8kPn7EfHJjUxpJsLjJQKJKXlYti8g2jqXBn7zyes12olM1EUfEnSDyMIozjDt0eWDTw84ItdmswCfd+4MP+DJS7nnfHOha7ac41p5QpG17o0reW0aFIHAIDH4BAQ8d0SKdeKTLeHMYE1c66En6Z1AecEMEAUBJgayzddo5Vw70kGpiw9jtae1XA9LgWPkrIBAJKkvxsTPsql1ElfgYtP8GKdqFsav3n007L7AMDOK8LcRsizZQxuIrgbMfF9xqS6xJkdYzBlrHiorW8HR+w7cx8rPu0C9zq2YEV72Ms/im7s85RcDJy5B0QAl/hCAv9QFBUeP0/vTG0b1mQLN11CyP7oPClPqhq7e1SOofA74J0K7eKn3m1touqxe3FfQSUKMDVWQqEQ4DE4BEaxGlVBPeVyU2PF2PaNarIzN54hX6MvVV4hMihEAYXa376knPgy6NkP0ZH+SWX3vW1qDAw3sVDm1QDBmwFjBUGoXvaYV2FrbYKQrz9A/y/24EWuyhTZT02sbSumTfFppA3o5akCgIycQvSevlOXkVm4KCrc/8uyNt4W70RoO6+V5pWUZgltPKvZrpnxPjQ6PQZ+vgd7FvcDit5oScIeUUQvACBOXAJ6M0jPGWMNiVh1RswBAlUEAEZIAVgM5/o4AYqsqL/BOLPj4I2WRnrdeyRwE0hMbp6LpBWI5UtQPAT0KgbsFgSxku/7zrh4JzFl9yNdVTdFXl7d6lZGu37sh+uxL+Be1w4KkcHry92ITsjYExPu37vsud4Gb11oV68Qe6URi181vbOyjaf84I/+/gjWft4VAHD9XjKGzTkAAOAcOjDKFBizA4A7zxKUODm39Gv9D8Wp9/pqSnPFMwCQOHS1qlgoGzpVyt198r4pEyCcW+sDCzMjeH2xG5ELZG07T4hAckZefFToyHpl7b0pb3U+2rnv2vpMIT08t85H2cazOlIz85Gbr0X9mhUMx4Qfji0uoNe56sB6Gv5/MvGtP3j/XxQaifzl38R5y0eJ2ZsOnk8wZ4J8zy3MjAAAs0a1wtLQKwCAY6sGIWJ+b0c3H7XcAPk74jx4Y2N3PzWt2nqdktJyiYhoXuBZen9SBEkSp2+CzhERkbufmlx8g26WLFtj4GITYPZbfej+Drj0/7mem3eIoaHo5BM40N03iLv7qYmI6FJ0IoUduUsfTt1Ghy4kEBFRUnouXb2bRK7ewU9KW/sbUN93ja2nX4gUejiGOOeG8eahc/ZR4O7bNHTOPtIVDWi4+QYXli3/b8LZN2i8u5+aAnffIiIiSZJoRcQ1ajVqMxERLdpymTjn1GrUZvIcFnykbPn/V9x81Nlnbzw1jBgt3HiJMrILqcnwjRT3OI1ecin6Obn6BM8vW/7fhptvEG87egsREemKBoMij96lWevO0sKNlwz3q+vHkeTqEzi1bPnX4Y2rS1ev4J1MgEXrBtUxe/15AIBe4pix6iTOrPVBvZo2AACNTo/xC48iI1e7tIyJfx2cC3uzcrUo1Ojh/81B7DoVj4GdnXDm5jPoJfnTvn7XLRxcNgBKhfA9ui2XP+hvwBsJXaNluImgZH0UCrkNlZ2rAQDkFmhR374CjJQifoq4hrsP0zBmwREUFEo5iXvHvHKc+9+ETpI+JwCfLD+BjXO6w76KJYbM2Y/ZAa1wIy4ZRITgfVEQBIbFkzqr3Kws3njI9I2EtnTImwMAM0e0BAAUavTgnHD21nPUsDNH3xm7MPgDFzjXqghTYyV00A0qa+PfSPzWgGiSpMenbz4DADhUscSmOd3RvmENVLAwxuOkbNSqagkAaOJSGUwUmjv0CbYuY+ZP8UZCM4GN79G6NgZ2qg8AkDghaN8d2FoZo3ubuti1sC8qWpkAAC5GJ2bEhX10qIyJfy35+bz5y79D9kXB68vd4JywZEpH9Jq+E58NaQYAuPckA0undIS5CX1Ssvyf5bWFdhoU1IsxZv79hPYAgK3HYqHTS1gVcR2R3/WGhakKhy8kAAD6f74bBVrpl1e52v5bSdjz0QtJ0t89ff0JTfVtgsCZH+CniGuYvuIkXBxscD02GeduPcfdR+l4r5kDiOHTsjb+DK89QOHmG3yBMdbi9ubhAIDh8w4gv0CHiQMb4kVGPhZtuYojPw2EpZkKHn4hOVFh/pYA4Oqj/pYxvFE19L8AgecpCgsXK8wtEg8s6yfk5OtARHCsWQF3HqRi2JwDcKhigR0L+wIAmo7YhKshQ19br9cu6OYdnMJEZvtSaI/BIYZ9LdyqYM3nXSEwhrE/HMHxq0963ts6ap+rrzpZYLA7sLSUM+a/kg+mbNNHh/orXb3VOwQRfaf5NYGTgw0mLPwViyZ3xL3H6Th54xm2zO0BAPhl+3W+bN8169ig15vlem2hXXyDdSO7uyk+HdIMeQU6tBy1BZO8GmFUHw/DdN2Vuy/gP29/zJ3Qka4A8FLo0794w+frfWVNvjUOLhtQdtOfptuUbWU3vTX2LekHzyEb9NGh/krHbsuNjG2sCod2c8VnQ+XvcsLzLFStaIYO48NxMXAwAODIxYcYv+xo4/iwUdfLmPtDvO43momMKdo0kCctTI2VAICKVsbYeCAaAHA99gWGz92fl6kza1KqJAAi4FlK7jv79zYoa/Nt/itJ/MHJGs7htftMPDRaPW7eS8HHi4/i+LUnmOLdGM38NwEAmrlWgciFSqUK/wleT2ivCAEAVAq5eIdxYXCoYoH+nepjWHc3TFp6FCPmHcyJDhtp/nSrd0HZ4uWUJjpsxNbMHM2W9z6OhEstG+xd3B/5hXqkZBZA4hySxPHgWRZEzuQ+12vwX4V28Q7yrusdVNPFO3C3YWNkFAFAVq4GRIT8Qj1CZn8IAJAkwvErT6HXkdznKucPERXqPzgtq/Bpx/ERAIABneph0qDGGNnTAydvPEFOgQ5MoN+G97pGqOp7B8o3/z/wX4UWRSHMykjxo1IpljA2hwAgMS0Phy48RKP6dqhoaYJdp+LRcNgGEOPN/wrPj/81YsIfOWTnFSR5DA7Bqevy5NXofp6YsfI0XGrZQM94qfhuAHDzyJnuYm+z381bXTr4rAz/UWjnQevHA0CdGlbe1e0sDfOrACPilFeok/DZylNYPLkjthyKwZe/nJbuPEswido88nIJM+X8YebyKP1jBy5J2RMWHcO3weehFAU0caqMxNQ8KAiG4WPnfuvdXX2Cw8CYvfqrbgAge3P8Dv9RaCaKswAgeGY3dGlaQ1ml23I7F5+gaDcftQRGpno9obKtKbYdj8OCDZfAddQFJ+f+q6ch35jIudro8ABr4jwt/Nc4NB2xCSund4FrLRuQoKj48jBSibYM6A5iH1hbGsPcTOFYueuPZqWNFfO7QtfxirASGavcuYk9zE1VmObXjFlZWjQWBcGFCRAYE1j7RtUxrl8DLAm9Bj2X+t/dGnCyrJ1yXguKChtpyzkuaPUcncZHQKEQUbOSmcGJQWTkwBiZ9+voaA8Aiz7uwGxtbFaVslKC3xXaWMw+DQDfjSsOXVIKmCFJfDpxilYqBBirRMxae5b0XOp/NyxgR8ny5bw50WEjWklEoZm5Gmw6GI3snMIp7n5qcvIN6kWMRoAJbNyAhgwA2jSoDqVKMbxOvw2v7IK9UugKXmusBEHhMWdUS5iZqJCdJ8cjWVkatYsJH7kIhPRx/TwxduFREFi2nkxvlbVRztshJtTfj4jSl4VfRasGNWwAQOAYzrjgaGasQDU7cxARGGP42r8ljIz5Z2Vt4PeEriYqF6qUAvp3rA+NTo+9Z+4DAHLydApHn6CuTGRt7SqY4XlKLgTGrIxFTbzLoGB5ULact46Ga5prdRyutSsCHNtzpIyhTKDq3l2cAABZRS9iz3Z1wcCnlCkOvFLoDscVTBBGB33ZDYwxxDxIM4SgHP7JC8aCcHiqT2Ms2HARnKTZL4tpNXS1pJly3hzHbsuN3LwDU41F43gAWBZ+DXqwgyaoaMOYwCb7yIOOmqIAB5VChMAE0dUn5KPSll4htEvVB+EA0KC+3DdPzSrEiq3XAACVbUzh6WgL9zq2lJuvDYwODZin4+hTqJUq3d818u/ntfgPR2lt5cVE0dDShtwI+14h8oEvw5WeJOdAq9PjzE050mj/0v4wNhImlyyDVwnNGOsDADn5WrxIy0NaVgHUX8ljJRnZhZjk1Rgj5x+ENlP5CQDEho3YHb814Dcd+XLenBeiaBiNlLj+HAAwBhuAfWisErFy6w3cf5YJrY4jKiEdAFCzkgWq2pm6ljADlBXazTdovMAEcePsD2FuooS1hRGuxyXDSCVi5i9nUKDRo5KNCQSwnPiDQ/++Tub/I6RvHpp9J1ajuhOrUcVIh2QPDwCCQJ2sLYxx9MojtG9QHRqdhLTMAuQVyN9qrZYzN7+gUo4KpYQmsOWTB8lhoYwxGKkUeJaSi7M3n6J2VUtUszMHwMCJyVNUxSVZ5SG/31kv5w24OkaHq2N0iIyUiCMSABgTVEZKEYEz38eXP5+BXuKIPBoLI5Vcne/8oQ8AtqCkGYPQ9fuvcRYYU/Tt6Ihdp+KRXyiHQOUX6rB4yzWM6uMJAMgr0AEc+S/LufkEf+86KHBZNWZ3++W2ct4NhcBcyNU3Iub3gq2VKQr1HLn5WtSpYQWFKGDHyXswNVaia7NaivoD1LJoJYVWqBRjAUCj5XivmQP6TN8OFM3LbpnXHQAQMP8Qth+/BwiQJ6BdZ6uYwGYwpejQumGN8mw875j7YSOiiYM3c6mCuMfyN3nZ5I5QKkU0c66CpaFX0NS5CgDgu7FtoVByQ/YHg9AE9j5jQHU7c1SvZI6mLlWQllWAipYmMFIp4PXFbkwf3AztGlUHce4IAC6etcYCQLdmDr3be9YQ6g38+Q/FDZfzx6jac41p/dJZlYgETs1cqqBuDWs0HLoBuflaSBKHSini+NXHqFnZAgCgVAoA0OJlQYPQDILj0A/lxlrc43TMHtUas9efg7mZCj0+2YZWntXhXMsGnZrYAwpUgleEKApsuUopYv74dszOxgQKhXLiS3vlvD6Og5dbosNshY218nMjBfvN+HWXZvYQBQGzAlpi2NwD0Esc6v1R2PJNcWAqABDI4N1jEFoQoLwe+wIAMGzeQRirFPh+fDtEJ6Shbg1rTPUpzqbEOGOuLDcSALbM6w4jpQIedWwhMOEDw0HlvDYqvcV952p1mnVp5DCmfaMa7sBsuZVVRPDeKIz+/jD6dagHxxoVcP72c1S3M4e5iQrrdt1CgUb2KCUIhvxZpVrdt+/LiXQ86tri81WnYG6igrFKxIppXcCJMD/4AiA77guCQui3ac6HqF+zAr5acwa21qbgwGu7upRTDAPLELm0rW2D6nYLxrcT3X3t15fcv/fsfXwxrAXajQ3DDxPbw6GKFdo3rIECjR77zyXAxEiJdTtvQWTFzp+lhJ7qK7+1iz7ugHN3EkFEqG9fAQnPM9Fr2k7M9G8JKnLBXzalIxrUq4TkjHyM6i037kRW/ASV8/owkdVjolDVyd6GWZiq0KmJ/TAX7+AuL/c7O9igdjUrzBrZCocvJoCKEt61GxOGTXPkwa1RfTzBGDPUBKWEjn+SCQA4cOEBTv3sDcYYktLz4TtrP/YukfOPbDoYBWeHCujSTG5kL958FQ5VLCBxAuelk7iV83pwvRQFAJ717HDk4kMs/6QLq1bJ/JCTz/pqjDP2tb8c6/Z+i1o4ffMZ7j5Mw7YT8Ti0fADMTOR3TSEygGBwAilV9+858wAzh7fArpP3MaiLMwTGkJyejwvr/SAU+WrfiEsxxFMBwOFLDzE9sylu3ksuYek/Y6wSMb5/g7Kb/1a8y+v7b28DF4UYAXADAPuqFkjLLoBX53riivAbT8A423PmAZRKEfefZuLbMW0xZ/05fNCiVhldHkHPuZwzoySuPsFP3P3UdPrGE7p1L5naFAVq95+xk4iIXqZu3Hf2PsU+TifOOR26kECJqXJ223O3npGbr1oOtvodXH3VyS/TOvzbcfUN1pW9Py9x9Qn88eV9kiRO4xYeMZRbEXmNWgZsJs45fThlK+UVaGle4Hlas+MGrd523XCc71d7yM078KeXNourbiaEQc4UBA9HO3RqXBPxTzOgUikw8tuDkDiHVifhy5/PoH7NCmCMYe+ZB6hS0Rx3HqShlUc1gNPvXnw5fxyBsXgAICIIAkP7RjVw/tZzAMDEgY3AOWHioqPY9n1v9P1sFzQ6PTYdjMGQbsVzGXY2puBEWw02DXuy+GIQp5XbbgAA5o1uA4cqlrhzPxWLJnWAUiHi3K3nqGxjCgC4/ywTClFA/xm7YF9ZzlpMAmUZ7JXz2qSkKjYBwNqdsuOOz3vOWLOzOL+PY01rvEjPh4mREtt/6I3DFx/Bp6tTqeUnTlx9AuhhyGxsEDp6v38SJ9LEJKThUVIWGGNQKkRUsDCCjaVc9+cV6gzpEKcuPQF3R1ts/6EPLM2MoJNTMjx4aa+c1+fFkWH5RFy7pkhoAEjNkgNeJImje+vaSMuS21nmJipMHNgQPl2Ls2Tm5Guh56QvmcK6VKtbm6mqDADeX+01bMvIkdNVAEDEr7Ho1qoOsvM0cHKwxsie7oZ9v156BMZpo2FDOW8CEZDSxrM46e2kQU2wYX8UOAFtPKojNatAzpsK4FlKHkZ8U5w79ovVp8GotBalu1cHh2YTSUl5BXoMnbO/5C4QEQp1ekzxbowPp27DRK/GWLT5Cr5YLafX+GzlKUSFBxQ/IeW8EZzjsJFKxIFzD3DvSTq6NrfH4tArYAyoVU127Zq9Xs5sXKjVY9mUTgCAOw9SceLaY4oKGzmypL1SQgNAVOjIalzi2TfvpSC3KBs9AIz89hCm+jTBw8QsZOfp8Mv2mxjV2x0Lxsvz4ZxD7oSX81bQa4T5sQ8z0LVFLXy++jSGzd2PpVM64WJUIgBgzqhW2HkyHlm5GpibKHG9qHs7av4hcGB5GXO/FRpglKvQOhOAT346iS5N7ZGUlgcrMxWMlCKm/XQSy6d2xILx7WBtYVyiHP29kp/9w4nfOeL+/efZOoUoYNuCPlg8uRN+Cr+OKUuPY93OW+jdTg616v/5bjR2qoTElFwEzD+E3DxNYUzoyN/kJnuF0MDjzWMTSYLj+dvPsWxqJ/y4+TKWTu0E97q2SMssQKcm9khOz8eTF7I30dgffoVE+tVl7ZTzZgiMIucGnsOaHbdgpBSxc2EfzP6oNbYcvgulQkSP1rWRnJEPEyMFmrpUxqXoJOgV/JWRlQah3XyCstz6rnOBnLZCDQXmAYBOL8HcRAXGGDYdioFWktDr0x3Qcwk1K1siv1CHs7eeITb8oxMlDZfz5mh0fP7WY/fQrWUtDJt3AJ+tOokerWojt0AervhuXDtUsDDCl7+cga2VCSSiF7GbX61DseMBY6ZkJJxz9gn+iIlsOCP4AUChVsL2E/cweckxhOyLwqpp72Hv4v6oZitPcG/YH0V64p+XsFnOWyJ+a0A0Y9Acv/oYuxb2xXS/ZjhwPgFj+nniyKWH2HQgCid/9kZGdiEszZQkgBa4eQcbcoa4+gSdrDsoqLGrd9A5wdUnKNdtkHolOIt/v0UdC62WTnDO8ziRHoChQXb65jM4VLFEI6fi0J6PFhzGysgbuXdDR/5g2FjOW0XSS5NuxadAr+dgjKF76zoY1dsDM1adRtVK5uj56U5wApggMAHCEiay7i7ewbvhOlslCEJ7EwV8KloZ1xUYsQKIfLyRkZi+eHJ70ViFK9FhI82jnz804RLxp8k5WDC+Lfp1rIe8Qh2+XlOc/P7O/VRwQfIodWXlvFW0Wbkhhy8+4owBnSZEoP/nuwAALd2ronMTezwtaidtPnQXSqVhUY90Z8+ajwCgb6f604yNFVYCCXSMMYEpFNRCEATMGtnKwsVPvbuyytxIEJnQxLkKerSui+3H47BgfDt8M0Z2YdpxPA5Z+dpzMVuKR1/KefvEH5ysYRI/NWTOARxdORB6idDjk+3o0KgmPl91GhvndIeRSoRGqwcToONMcgMoTiGIlX+Y0A7fjGojJCbnagQixAKApamxCADdWtVmo3q496pUqdJHACAIDKmZ+dBLhHo15Ez6qZn5mBd0AYW5+vKEYX8BdyIDOt2OT+HjfvgVuxb2wb4l/TGgUz0cu/IYno526N22LqrbmUPiyIYGUCjYt2tmdGXdW9cBABAT9AKDeB8A+raXl3H4cdMVfOLXBM1dKy8FgAmLjiI1qxCejvJaypwTukyMhE6iLQl7PpKdzMp553DigXFPMiFxwvYT9wAAOokjI7sQz1Jy8DgpBzodT2JK4VrovF6stWd15BfqoNHpAaIcVq9/YB0jY/F+QC8PTPFpjM4TInBs1SBIEkeLgC2oaGWCRk526NTYHh+0rIXhc/fjauwLKtDrKjyIHPOnZqteJpS7FOQH9b4ywR5vkXFvwWng5+2lVoN4q4zp6wmPISH66FB/2T/+D+DqFaESlPmagN4eGPKBC74JuoD07ALMH9cWM1acwp0E2d+vV/s6+G5MOxRqdZgbeBEBPd3g89W+mwwA3P3U5Pu+E74c3hIzVp/Chy1ro2Pjmvhi9WkcuvgQNezMEfx1N9yIS8GUZcehB625u8V/bNmL+W+8FPrUz95oPy687O63xsu0lW9CyZSXb5sbG4caMgeW3fefcPYK9FUoxS2nf/GBtYUR5gddwIhe7gj49iAyczWY6d8SPdvUBWNA85GbcGzVINx9mI6Pfzx6xNCPTk6To2w+9WuKjxcfAwAsGN8OTZ0rIyExG4wxzFdfACfSv47I5bw5dyMDQol4bq9P5SwiTV0r4WFiFpIz8nFs1SC0b1gDjAEXoxLR2LkyzE1UyMzVILtAc1MAAOKUE/s4A5+tPAU7a1ODT1PEr7H48eMOqFPNCrPXnUVKZgEYkZyzsJz/F6RC3iozV4NFm6+gdrUKGPvDr1j7xfswNVZi0Fd7AABfrTmD1Z++BwBYsuUKBE435Dea0eOnKbkY0cMVjxKzMKCTI7LzNDh4MQFW5kb4YUI7nLgmB1pzYmdKnLecv5i7O0bd0RO/v+FAFBZvuQxrCyM0dZHjrdIyZWcEnY4j/mkGYhLS8CQ5F3cinoQKkMWLBYD6NW3gUNUKY/s3RPdPdiDucQYAoL59Bez4oTeUCgGigsvRXS/pMFsBrwix1LZy3imM08dEwLnbifjYq5FhuygwBO+9ja4taqG+vQ1calcEceLAXC4AgB5sk8CAx8nZkCSOyjZmsLZQGfrN63bfxvGrT7FkckdIEmsOABVb/2BRpVugnXt1h8QaWVnF6+yW884hSazLGLD1u17o0bo2DhatdKBQCLgem4xpfk3Q69PtePAsE1KRe5dcdetxiRNQs5Iluk3djkMXEhA8sxuURdl71Xuj4NvVCR0b14SZseITAKhsb7fXugLzrmBuZGluI7x5M7ecV+LqEziw7DZRyRfMDmgFJwcbpGYWIPahXMkyAM3dqqC5/2YEf/0h0rMLITBcxUuh720d8QwArsW+wOHlA3H0ymN8v+ES7jxIhcTlkEzzIg9DW2tTlZO3+gfGqJbAUXP5J11U5irVopIXUs6b4+wTPAUAGGMRVh2WGpamcB0UPLiCpYl51+YOIALMTVU4dycREufIK9QhOiEdJ372hq2VCSYvPQ69TrcWJacpJaJr05bLU5kLJ3bA1yNbokAjof+M3RjVS5632Lg/Cm0bVIdSxGeMifaCKHzWyKkyWnhWFVy9g71e2irnzVGAzavnHeLCmMCqVbUs9q5VUEgla1M8S85FxK93UdHKBMnpedhz+j6+HN4c341rh7wCHTgRcvK1iNs6+hhKCs2IfsrK0+LwpYfoO30nrC2McSnIDw+eZ6FKRdmX+8fNV/DFsBY4vFxeysDWypgA4KepnaEUsOSlrXLeHCIyEwX9kinejWBf1dIImK2oP2hNMwGCaG2uAidCYnpRhhEGrN99CwM7O2HTgWj8vP0GiBO4nuSx0pJCF2oUB4g4fR9yCSumdUbnCeG4FJ2Etg2q48ytZzh65RH83neGIDBUqWgGC1MlWntWZ1m5Gtx/molZH7Wu7uoTPOGlvXLeANfZKiYyoYKZcbeA3p7YNr+3qZuvwzalYHQUAKb6NgWRnF8GAJSiCCYwvDcxElVtzfDduHaIf5pBkiQZfMcMQj/YMSwZYHmpWQWoUdkCx1Z543Z8Ksb3b4AdJ+Px2YpT+Hy4IVMCiAhdmznA3ESJH7dcQf9O9ZlCwb4HyiMq3xS3Bg7fAcCKaXKkrJmJCh97NerJBFi0b1QD7nVtIQoMuXlaFGh0yNfoMXN4SxxdNQhdmjkgv1AHv9n7pLtbRxl8tks5B+q41BcAPIdsQKFWj+E9XOHhaAfnWhVhbVG8DiYnQm6BHgoFgygKiH0kt/paulczd/MJKm+YvSGMCdNEEDVxroyYR2kgIrjWsRUAYPnUToh/kgmlUkB2ngZD5xyA+usP0LBeJWh1cqrILhMjodGx71BiQblSQseFjzoqcSkZAHacuIePFhzBgpALWDalI1Izi9dAEQUBDRztcPamHPjlUEVOdPBRbw8wQfzEpf/68gxFr4mTd1BrABjc3Y0BwMqI60jPLkS7BjUMxyzafBmONSrgZnwqYh9n4MufzyBkfxQUoixndr5WH7VlmCFPK8oKDQBMkvOQLNhwCUundMTIXh5YtPkyqtmaYfW2G7gSIy+V0dqjKnaeijf83WPadjR1qYIJAxtCMBLl3FXl/GkUjEIBoFcb2Wng3O1EQ2y6Ug5uR5/2jgCAKrZmmB3QClvm9cCYfg0gCAw7TsSBiH5Tq/5G6OhI/xucYw4R0HlCJIxUIpZM7oR9Swbglx035Uh6ADUqWSK3QIcJi37FmH4NUbWinDiwd9u6mDm8pYeTb9CYMqbL+S84eYfWYoJob2ttjNrV5cFGvcRhaqwAEeHzoS2gUAgwMVIgJ1+LR4nZGNi5vuFNjnqQiq/WnC2ICRv5RRnTvxUacub3uUT0GAB6TdsBItmlyO99Z2w+GAMAMDeVkyWs+vQ9MAaYGyuRmlGAycuOoUF9O6UI/OsXBP+ziKxgXe1qFnR8lTeMlPL9tTBVwkilQE6+Dr/skp0h2jWqgQu3n0Orl5CSKXexnqfkwufrfdADpXNQFfFKoQEgSm9Wh3MpLTNXi8bDNuBhYhZmDG2OQ5ceoUCjg6WZ3Dh72QB4mpKLOYHnoP6qG1xrV8SI7u4mbt7Bc8qYLec/wVjHldPeM/Ra9BJHpQqm2H/2AeIepyMlowASJ4gCw1drzuLGhmGws5bHOKYuOw7OeWBc2EjZmaAMvys0IgdJ0WEBthKX8vSc0OvTnTh14ynmj2mDtqPD4FC0kHVCouxNZGqsRHa+BmYmKqRnFWB0P09YWyqnAeUzW38EZ5/gCVVtzBT2RQ1bALgck4QnL3LQrlENJGfIby4R4WlyDlxq2xiOC5h/CFEPUuOjw0aOMmwsw+8LXURMWIA5EWkAYOKiY4g8FgdrSyPk5suddSd7+YSNnStjUGdnAIDP13thYaLCj5M6mbv7ZBdPeDDiAKBU/ru1FwUBDJCrwiIEgX6sYFnchQWA8F9jsXxqZ2i1Er7fcMmw/eftNzGqtyeICP1n7ML524m6qLCRsnfn7/BfhQaAKP1+M855IABcj0uBqZEStatZQakQ0G3KNhw8nwBnhwq4ce8FDl98hAGd60MQGFzsbcC5YEiYAg4dAJib/ClXqf85NFo9CMWpoRy91XUFCCadm9qXOu5FWh7q1LBC8L47OPmzNwBAp+c4dvUx2nhWh9fMPYh9miZJedriiPnf4Q8JjchIKTps5Citlj4EgIeJ2Zi89Bj6d3DEs5RcTF95Cu81c8C+swn4YvUpjOkre2EqFAIEhWDm7LWuCQAwxncAwKELD0sNwPybqF3NEheiEgFOBjdYpaA/PravJ43r3xCnb8iePACQkpGP67HJmDCwERhjUCkFMAacXeML31n7ePT99BeFOn3FuL1jDCvc/R5/TOgiRAXWvfz72JUnciYiABtmdYNCFJBXoMOAznIN8uHU7bgQlYgWblUhKhQLASAqNGAywGnhpss49bO3oX/4byLwyw8wa+05REsZXQCg8pANZgom1hjbvwEDgD2n7xtSVmTmatCtVS30/HQ7PAaHQKvjUIgCPvrukO7W/ZSrMRH+Vf6oy/WfElpgsAYA4uDgtHdu4HnUr1EBgXvknOytPKrBytQIL9Lz8SI9D+81c8D6L9+HlZnyZSpi4hJdS87Ix+gFR3B2rQ886sqBAf/ruNSqgPPrfLFgw2WkZhTsx9ZpBQBQUS99WaWiOROL+sI92tTBishriHqQiu/Ht0dmjgbJ6fKopCgA63bdwqWYF0oGuAGj//A38M+9Uh1mK1wr1/R+UYjdabtH5bj5BGdP82tqsTTsKrZ+1wtGRgr0mb4TVW3NMKy7GwZ0rIcD5xOw98wDnLh+t1L81skp6HBc4Vr1wTNBYHZW5iZsXP8G6N/BEcZGCmTlalCgkaDVSdBJEgo0euQV6JCdp0VaVgES0/KQmJKH52m5eJqcg/Ts4kQ6JXmXft0VLIxQw84C1ezMUdXWDNVszVDRygTmpipYmCphrFJApRChUoowUomwtjBCoUaPXafjsTz8OnLztVuiQv3lZd7lZZtfNHerUmnx5I549iIXrnUqYvSCI0jOyMeuH/vgaswLRD1Iw5KwqxjygTN2nHkQm5endQIAPdG3d0P9vy51gb/DnxO6CFefoJNMoZjEdfquVmaqH+vWqIBuLWthyIeuaDpiEyxNlTi22hvdpmzDgaX9Mf2nk9h3ISH4bokEKi6+wXMEoolMECrKY++/fykWpkrUqmqFOtWsUKe6FWpVtUJFK2NUsDRGBQtjWJiqoNHqceXuC1yOTsKUovWg3oQloVfR3LUKmjhXhrFKgdwCLTJyCpGZrUFadiEePs/E/efZSHiehYTnWcgpke+lJJx4AWPCU0niF+/GXxiJq2sNSfccB2+0NCYpy76yBTbP7Y6v157FimldkF+oQ5vRofj5sy5o6V4dq7fdwNErj9Cxsb1u0qBdxm6+9rc4CSYxYWb1gUGlWu+/x+/f3f+A52C1dHadL2s/Nuy6Tk+Nh3d3Rcj+aEzyaghrK2OsjryJ6YObwsnBBnVrWGPjwWh8H3IpJTrM/xXrJhKDV6SA5Chmb17ZQjBSWRoruRGJquoCpDoiF+pIoFaCwJoxMHMUTcmUvXDGAIExVLQygc979TGytwdE4U99mQwE7rmF0EOxcoonIkNGY0jgkiCdAhdOQhAuZeakXErMyclEpWhCpCvJ62ozlJw1+k84+waFmygVg66oh4ABeH/yVhz5yQtD5+zHd+PaoWZlCzxNzkHo4bvw+8AZ70/ZOTF6y7BVzgODut7dOvJP5Ywpe7/+K65+6n2iRJEj+rgHT/VpguPXn+h/3HhZ8TQ5FxamSpz+xQfdpmyDKAo4uEz2RCEiNBwSQi9SUi1eHJmeV9bm62LfY3UFY0uTykpJqsoF0QNE7QWBfcCY/EAIAkPbBtWwfGpnw3jwqyACZq09gz1nH0Crl2IY5wuJKW9qFOzZg03D/ng22z+Jm3dQlpujrWX4t70AAN9vuITh3V0xZM5+HF05SG7nfLwVKoUAED0XBDFz1qiWLjN/Pv3x7S3+v8nM/5/400K7+QRlMUGwBIAza3yQr9GjoqUxVEoRuQVahB+NxY7j8XiWnIOlUzuhjWc1KBUipi0/iX0XnlePDfOT5zbfMU5+6k4KLn3HGGsBJrAuTWvih4kdYFRisIaIsG7XbSwPu64D6JvocP9vShl5h9R5b42VaSWjzCbOlaH+uhsAoFCjx4AvdsPESIFaVSxx6NIjGKsUeK+5Pfq0q4smzpXRZnQY8gu116NCRxYvifAH+NNCO3gFVzFX0HPGBDaqtzvG9G2ANqNDsXNhH9SsXDx8V6jRo8e0bUjOKISVmQqFWgmFGn10VJi/+x+t2t4KjsuNXJtaJAgMVcAEdmylF+wqmEIvcbQZHYrsPN2Zu+H+7coWe9e4Dl7fWyDFLqWCoW51a9x9lAFTIwXaNayOvh3qoW2D365DM2LeAVyNTYYk0dyYcP93P49Qv9fa2u5+avIYLKcazi/UUY9PttOa7TeIcznd80sycwoNx4QejuGuvsF5rj5Bf3mqKrdBG3q5+6nJw09Nj5KyqEXAZnLxDpKHm/5C6g1Y287VW33/0+XH+ZOkbErLKqDHSdnUeUIE6fRSqXtXksijseTupyYX70BDxt6/BGcv9VR3PzV5f7XHcDGLN18mz8FqSkzNJc45/Vwif/SwufuJc047TsSRu5+a3H3VkrNvyH+sKit33WBW1zuoZtntr4urb0hbdz81ufupydUn+OOy+1+f2UI975DirKuvwMkncKCrb/CTtmNCqaBQZ7gvRETX45Lp2JVHhv/n5Glo1+l7dC02iYiIcgu05DFYTW6+QfJqsH81Lr5Bl9391NTcfxPdvJdMRETHrzymBkNCaN/Z+9RubJjhKZ0ffIGS0/MMP4aIKO5xOjX13/i03kD1b+spAK6+gW1dfYK18Jr91tbqcPFVj6s/cG3tsttfF9eB4TZN/TfqGg3fZBg1LIlz35CKDQcHx/p/c4AGfL6LCjU64pzTos2XDCL6fr2XiIi0Oj19G3ye5q4/Z7hHnHPqOD6MXLyDSse8/bUQc/MJLHT3U1OrjzYbLk6r01Pfz3aSu5+avvj5FBERJafn0dA5B4iKssoPnbOPiIjiHqWTm28Qd/MtzhYPAM7e6usVe/9g8fXPJ7XvTdqqbzt2y7aS+///ma1w8w2+MPCLXdKaHTfIaWDQb7Iz1eq/0qHd+NACnU5f6nt24upjep4ir1zww4aL9PRFFh27/IhaBGymAk3x256UmkutRm0hdz81wSvijR72P90YK4urV4SKCTlZJqYq47NrfbH/XAK2HY+DUhQQ+zgD2XlatHCril9mvIfWo7bgUrC8ip7PV3uweHJHVLeTE9MdvPAA05afiIwOCxgEAPUHrPMUVYqrShH8SvBQVXaeFqeuP6HdpxO0V2OT7liaGl1Ozys8F3PjYTii5756tOItUK9/YB2FkjWDINRVikJ9zvXNuzav7TK8uwu517FjRECTERvOa/TstFLEZ3e2jGCQ55d7KAS299Qv3qhgYYyk9DxUsZHdrQbN3I2I+b0BAF0nbYWVmQqj+3ri/Ra1DOdNzy5Ex3HhkIhLGo7a98PfbH3uNxYaRdUXKQqSerSupVw4sT1YmcmKxLRcTFl6HDEJ6fhuXFv0bFsXnBN+2HgJX5TwFf/1UgJNWnpyR0yY/wAAcPVRfyEI+G5AR0ea81Gb31zr3YdpGPHNIeTmap+TAseMBHGfnvPnWVn5tx/vGy/H/P5JnL3X1oegaA9iUxUCc+3VtnaensPk1LWnwgctHTD3ozZ4lJiNanbmUCoEfL3mDLadjL8iMtaUS+QfHe6vru+7pq29TYWTB5YNEBRFgYrD5x1AyKwPodFKmL3uLL4b1w6DZ+9DnWrW6NC4BiROuHr3BUSB4YvhLbAi4ip+2Xknn0tCi7sRw+6Uvc7/T5irj1r76U8niHNOHy04RJ3GR9B7EyOp68dbqcXITTR7/VlqOHQDfRN0ngoKddR5QniJCk3m2OVH3MUnSA7dlwcVLrr7qeli1HMiIpq89BgdvPCAtDq9oYVfsqF/70k6zVl/lhoOVXM376CL7j7BPar2XCP72/wONQaGm7j7Bm9x91PT0tCrRESk1Umk1ZVuBRdodNT3sx20aqvcyEzNzJMblnJreCYAOHZbbtQ8YIOGiOjHTZeoQKOjXSfv0b0n6UREFLznNm3Yf4fajwmlpy+y6Xrci1LVNRHRrxcfkptPsFSn3+pXjCT+DbDqs9Ta1S9IP2nx0VIXXhLOOZ2+8YTc/dTkOTiEdp2KL9pefEzk0Vju5qee+9Kui3fQC8/BIXTi2mOiIjGb+m+imb+cJiKizYeiS5YlIiK9XqIuEyPI3U9NH06J5B6+QY9cvNcbFgkDALsOK81dfILim47YwN391HTu1jODHSKihRvlBlP800yavvIEdZ4QTs+S5W8rEVHn8bJ9V2+1nFQEQIPB6rT8Qi0nIvpgSiQREXnPlHsmZ24+Jc/BIbT/3AOioofpwbNMmrHqpMHmhv1R5Oajlhy91XKe5rfEb6rDN6XykA1mNnr9E1EQKrg42CB8fk9EJ6Rh88EYpGQWILdAC62Ow8JMhSHdXLAy8jrMTVWYNKgRHjzPgs97sjvSwo0XKfxIfO9rG4fsdRy83FJFFklKQTS5HDwYSoUIIiDyWCwCd9+Ba20bLJzYAUqFgPcnbcXhn+SQ4sycQgiMwcxEiaS0PDx+kc2/+uWMJjFNM4YxclIq2MxtC3qhblHAPxGh66St+HWFF1Iy8uE3ax9mDG2Oz1adwoLx7fBB0TeUiDBpyTGcuPYUnPOE6LCRdQGQu1/ggbBvendzq2OLm/eSced+KgZ3c8XZW8+wZMtV2Fob4YOWtbH3TALAgNXTu8C4aHHvZ8k5WLXtBnadfpAvkK7OnbB/SA43Z+/g0+5+aroWm2R4V3PyNIYntyR3H6Ub3r7A3bcoK1ceZBn/46/k4qN2AwAH7+Babj7Bkt+sfb8ZlPlq7RlqEbCJktJyafGWy7Qysrj/Pvb7w8Q5p3E//EpU9BY1HbGRxv5whM7feUZ6vUShh2KIiOjk9Se0buctIiKauOhXcvdT04yVxW8bEVFunoaaDNtY9CYH5b78vS6+QUuGzd1vOO7g+QTafDCaGg3bQA2GhND0FSfp3uN0Q3cz5mEq5RfIVXZuvla25xv8zsbV3/obXRJ338ANjAlDFoxvh06N7ZmpiRJHLj3E7HXnoJcInBOMVQp0blID1hYmGN3PA4mpeRj45R4oRQFTfBrjckwSHbvyNKxAq53F9SrBzJRiTVQiTq3xhbFKXs1t16l4TPZpjLjH6Rg65wAUChHn1/mCMYY5689hzqjWGPTlHoTP74kWozbj4NIBhpV/RnxzAKP7eKK1Z3U0H7kR59cNxk8R1xG09w6UCgEKUYCdtQk6NamJTwc3w7ErjzF56XH5B+boqtzZ89ELF6/gsaKSVt/cOIIJAsO6XbewatsNSBIhoJc7hn7oCkszI+glCSqlAqIg3/a4R+nYfvIeIo7GQauXQqO2jBgMsHcyPPxOhUZRLJFCYIcYY+Zj+zXAhIENgaLug41lyaUaSvPkRQ6uxb2Aem8Upvk1QWpmAUKPxPKoBymMMYHZWMrRDMM+dEVLt6owNS52tthz5j5+iriGzk3s8Tw1DyumdcaSsKvYcigG2xb0NsSKAYDnkBDc3DgMz1PzEDD/EMxNlJji0xhtS8Q6veTmvWQMm3sAOj3PM+W66lcjx2S5+K7rbmthtnfzvB7sk+Un8eB5Jkb38YRXFyfYWBojr1AHsxLX9pKs3EK0GxsOSU8cjA2JDhsRWvaYt8k7F1pmtuDm4xAIhuGMyY+zhYkSqz97D251KkKpkGeUcvO1iH6YjrSsAtyIe4HE1DwkJGbjUVI2POva4r3mteBWpyJux6fg6JXHuBWfis5NamJs/wbIztNi0ebL6NTEHmOL4pAOXXiIBRsuokPDGth+Mh6+XZ3x5Yji7tzDxCys3XUbwz90xaSlxzBhQEP0bifHNZVlzPeHce52IiRCvq5Q61TF1tJZqUT4+IENrQd2chJux6dAq+do4ly5bFGgaL2qvjN24mFijryBOBHHlqjwkfLAwjvmLxL6JbMVbr61HwG86kvB/xtEnIgEPQQuCBBKOYR/6tcUi7ZcgUIUoJc47CtbIPSbHjAxUkAhCmCMgYjgOWQDUMbFiAjoOW07nibnYJJ3E1yOScKj59mwslDBt6szlEoBmw/EYOHHHZCeVQC/2fvlJAA2ppjs3QSdm9bE2l23ELT7NuS13f4Y8u9BUnRmTm0cnPxqX6h3wB+62W8b58G/VJUKBUelkdKXEVWXwMwFDpEYckhAikD8IXGkiKK4miTi6Xlai8S9Y/Ld/dSv/H7ZVTDBqN6esLFQYdOhu7h5LwUNnSrhy6HNodVLGDLnAL4b2xa92tWFXuL4edsNXIxKhKejHT4d3AxC0TNHRIh5mA6dnsPJvgKMjRS48yAFQ+YcgCQRTv3ijclLjiH6YTo02mIPHon4fZFwAoIQUOKySqHn/CYjPo0X4FLs7lFFr/Vfx/+L0H8EF++graIoDAAAiQstY8KGXXTzDSpkTDDiepoUHeG/onbfkPomRvotgig2AQBLUyW+GdMWnZva41rsCwTvvYMLdxKh1Uu4vmEYNFoJQ+fsRwVLY8z7qDUq25gh/MhdBO6LgkJkGNfPE33a18OjxGwkpuVCvS8KZ4sW/xRFZEs6RGoE6bt7WwIeuPoGPxMYq0accqLC/C1dfdUzBIbvAUAvaZ3uho+OK/2L/n/52wrt7hvYgcAOc0JeTNgjW2Du71eQXhEqN0XeWiIaKAiCGQB0bFQD/TvVQ2pWPlp7VMe+sw+wZsctHP5pICpamWDu+nMwN1Vh8qDGeDlMiaL1sKctPwnI1Xu+SiFuvb5x6CvdSp19gi/pNbr+8TtGP3UcuNxOpbBIYEBhVNjIv50P899W6CLYn/VGcfIOaq0UhbMA0LBeJXw3rg3O3nwGJjD071jfkCQPRUnmOREUooBCrR7Tlp/A6ZvPwBjlKk1Vta+uHfxfIyD+KfzdhTbg4ht0CESzYsICLpbcXrH3egs7E6GrANaDMerjWb9SRf8ebnCrbYu4J+nIydchv1AHnZ5DFORGm07iEBmDVi/h5LWniHmYhk5N7fF+Cweo90bhVnyKBqBjxFlEtqTf/XTrR7+ZC3b1W9uQuDIgJsz/LTowvDv+9kI7dltupKhg+Vxg2L/u865Dvg+5SPHPMs+BxHQTldDD2tJY8HS0w9WYJKhnfYhzt59h7c5bpVbJNcDBIUAH4DeBX52a1MQ3Y9rAqiju+/7TTGw7Fqs9ceOpMiW9QF9QqNcyARoCVJZmRuYje7rR7pMPDu5Z2q97WVt/R/72QgOAi3dghiiK1vVrWmP+2HZwrmVjiE9iDIZuVOiRWBw8/wDX41KAl10ZsAImYVhUhH9px4UOsxUu1RwiBGJ9wIiV7O6N7eeJcf0blmqNE8nfEFFgIAI+XnIUJ689RWGBWDN+x9DiyLi/Kf8MoX3Vi0SGaQJjWDa1Izo2romGwzaCc4LAGPq0r4O4xxmIeZgOTgBxnsa5OKxQ0F5N+AOTA/UGqqsrBN4AIvtFZKwminzCK1mbYPyAhvh+4yXkF+phbWGEIz8NxNLQq9hy+C44kSY61P/3h/f+RvwjhEZRDLGSIVRkvKmJsZI1ql8ZTvYVkJSehyOXHkOnkzgYOyFJfPrdiJFv5ETn4h0cIDA+ChCbMwGCp6MtFn3cAYcuJNCy8OtML1GSRNLCu4mPV+DkXH3Z8n9H/jFC/4Yma5ROjsrpCsbcuCAcjNky/J2sRu86aP1giOJixihLr6WZsVsD/lp327fE/wFNyfckspEfOgAAAABJRU5ErkJggg==";
+  function buildDocx(v,which){
+    const D=window.docx;
+    const P=parts(v);
+    const W=9706;
+    const runs=(arr,base={})=>arr.filter(x=>x!=="").map(x=>typeof x==="string"?new D.TextRun({text:x,...base}):x.b!==undefined?new D.TextRun({text:x.b,bold:true,...base}):new D.TextRun({text:"[…]",...base}));
+    const para=(arr,o={})=>new D.Paragraph({children:runs(arr,o.run||{}),alignment:o.align,spacing:{after:o.after??120,before:o.before??0}});
+    const none={style:D.BorderStyle.NONE,size:0,color:"FFFFFF"};
+    const line={style:D.BorderStyle.SINGLE,size:4,color:"808080"};
+    const noB={top:none,bottom:none,left:none,right:none};
+    const allB={top:line,bottom:line,left:line,right:line};
+    const mg={top:60,bottom:60,left:100,right:100};
+    const kids=[];
+    if(which==="invite"){
+      const emblem=Uint8Array.from(atob(EMBLEM_B64),c=>c.charCodeAt(0));
+      const LW=5600;
+      const left=new D.TableCell({width:{size:LW,type:D.WidthType.DXA},borders:noB,children:[
+        new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:40},children:[new D.ImageRun({type:"png",data:emblem,transformation:{width:52,height:53}})]}),
+        ...P.left.map(l=>para(l,{after:0,align:D.AlignmentType.CENTER,run:{size:19}}))]});
+      const right=new D.TableCell({width:{size:W-LW,type:D.WidthType.DXA},borders:noB,verticalAlign:D.VerticalAlign.CENTER,
+        children:P.right.map(l=>para(l.length&&l[0]!==""?l:[" "],{after:0,run:{size:19}}))});
+      kids.push(new D.Table({width:{size:W,type:D.WidthType.DXA},columnWidths:[LW,W-LW],borders:{...noB,insideHorizontal:none,insideVertical:none},
+        rows:[new D.TableRow({children:[left,right]})]}));
+      kids.push(para(P.theme,{before:240,after:160,align:D.AlignmentType.CENTER}));
+      kids.push(para(P.intro,{after:160}));
+      P.sections.forEach((sec,i)=>{
+        kids.push(para([{b:sec.t}],{before:120,after:60}));
+        sec.p.forEach(p=>kids.push(para(p,{after:i===0?80:120})));
+        if(i===0){
+          const TW=1500;
+          const cell=(c,w,o={})=>new D.TableCell({width:{size:w,type:D.WidthType.DXA},margins:mg,shading:o.head?{fill:"F2F4F6",type:D.ShadingType.CLEAR,color:"auto"}:undefined,children:[para(c,{after:0})]});
+          kids.push(new D.Table({width:{size:W,type:D.WidthType.DXA},columnWidths:[TW,W-TW],borders:{...allB,insideHorizontal:line,insideVertical:line},rows:[
+            new D.TableRow({tableHeader:true,children:[cell([{b:"Ώρα"}],TW,{head:true}),cell([{b:"Στάση / δραστηριότητα"}],W-TW,{head:true})]}),
+            ...P.progRows.map(([t,x])=>new D.TableRow({children:[cell([t||" "],TW),cell([x],W-TW)]}))]}));
+          return;
+        }
+        sec.l.forEach(li=>kids.push(new D.Paragraph({children:runs(li),numbering:{reference:"bul",level:0},spacing:{after:40}})));
+      });
+      kids.push(new D.Paragraph({children:runs(["Ο Διευθυντής"]),alignment:D.AlignmentType.RIGHT,keepNext:true,spacing:{before:200,after:300}}));
+      kids.push(para([P.director],{align:D.AlignmentType.RIGHT}));
+    }else{
+      kids.push(new D.Paragraph({spacing:{after:300},children:[new D.TextRun({text:"3ο ΓΥΜΝΑΣΙΟ ΠΟΛΙΧΝΗΣ",bold:true}),new D.TextRun({text:" · Σαπφούς 3, Πολίχνη 565 33 · 3gympoli@sch.gr",size:20})]}));
+      kids.push(para([{b:P.offerTitle}],{align:D.AlignmentType.CENTER,after:60,run:{size:28}}));
+      kids.push(para(["για μετακίνηση μαθητών/τριών χωρίς διανυκτέρευση"],{align:D.AlignmentType.CENTER,after:60}));
+      kids.push(para(P.offerSub,{align:D.AlignmentType.CENTER,after:300}));
+      const LW=4200;
+      kids.push(new D.Table({width:{size:W,type:D.WidthType.DXA},columnWidths:[LW,W-LW],
+        borders:{...allB,insideHorizontal:line,insideVertical:line},
+        rows:P.offerRows.map(([a,b])=>new D.TableRow({height:{value:560,rule:D.HeightRule.ATLEAST},children:[
+          new D.TableCell({width:{size:LW,type:D.WidthType.DXA},shading:{fill:"F2F4F6",type:D.ShadingType.CLEAR,color:"auto"},margins:{top:80,bottom:80,left:110,right:110},children:[para(a,{after:0})]}),
+          new D.TableCell({width:{size:W-LW,type:D.WidthType.DXA},margins:{top:80,bottom:80,left:110,right:110},children:[para([b||" "],{after:0})]})
+        ]}))}));
+      kids.push(para([P.offerEnd],{before:240}));
+      kids.push(para(["Ημερομηνία: ……………………"],{align:D.AlignmentType.RIGHT,before:300,after:500}));
+      kids.push(para(["Σφραγίδα και υπογραφή νόμιμου εκπροσώπου"],{align:D.AlignmentType.RIGHT}));
+    }
+    const doc=new D.Document({
+      styles:{default:{document:{run:{font:"Calibri",size:22}}}},
+      numbering:{config:[{reference:"bul",levels:[{level:0,format:D.LevelFormat.BULLET,text:"\u2022",alignment:D.AlignmentType.LEFT,style:{paragraph:{indent:{left:500,hanging:260}}}}]}]},
+      sections:[{properties:{page:{margin:{top:700,bottom:700,left:1100,right:1100}}},children:kids}]
+    });
+    return {doc,name:`${which==="invite"?"Prosklisi":"Entypo_prosforas"}_${P.fileBase}.docx`};
+  }
+
+  // ---------- κωδικός μεταφοράς (αρχηγός → Διεύθυνση)
+  const b64u={
+    enc:u8=>{let s="";u8.forEach(b=>s+=String.fromCharCode(b));return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");},
+    dec:t=>{t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";const s=atob(t);return Uint8Array.from(s,c=>c.charCodeAt(0));}
+  };
+  async function encode(v){
+    const data={};Object.keys(v).forEach(k=>{if(!ADMIN_KEYS.includes(k)&&!PER_INVITE.includes(k))data[k]=v[k];});
+    const raw=new TextEncoder().encode(JSON.stringify(data));
+    if(window.CompressionStream){
+      const buf=await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer();
+      return "P1:"+b64u.enc(new Uint8Array(buf));
+    }
+    return "P0:"+b64u.enc(raw);
+  }
+  async function decode(code){
+    code=code.replace(/\s+/g,"");
+    const m=code.match(/P([01]):([A-Za-z0-9_-]+)/);
+    if(!m)throw new Error("format");
+    let bytes=b64u.dec(m[2]);
+    if(m[1]==="1"){
+      const buf=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
+      bytes=new Uint8Array(buf);
+    }
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+
+  // ---------- ενημέρωση
+  function ddeMessage(v){
+    const date=parseD(v.date), tl=teacherList(v);
+    const lead=(v.leader||"").trim();
+    const escorts=tl.filter(n=>n!==lead);
+    const kind=(v.kind||"εκπαιδευτική δράση").toLowerCase();
+    const prog=[`${v.depTime||"--:--"}  Αναχώρηση ${(v.depPlace||"από το σχολείο").replace(/^Από/,"από")}`,...v.stops.map(([t,x])=>`${t||"     "}  ${x}`),`${v.retTime||"--:--"}  Επιστροφή στο σχολείο`];
+    const goals=GOALS.filter(([k])=>(v.goals||[]).includes(k)).map(([k,,full])=>`   ${k}. ${full}`);
+    const subj=`Ενημέρωση για ${kind} χωρίς διανυκτέρευση: ${v.dest||"…"}${date?`, ${fmtShort(date)}`:""}`;
+    const L=[
+      "Προς τη Διεύθυνση Δευτεροβάθμιας Εκπαίδευσης Δυτικής Θεσσαλονίκης",
+      "",
+      `Σας ενημερώνουμε, σύμφωνα με την παρ. 3 του άρθρου 16 της Υ.Α. 109113/ΓΔ4/19-08-2026 (Β΄ 5237), ότι το 3ο Γυμνάσιο Πολίχνης θα πραγματοποιήσει ${kind}${v.title?` με θέμα «${v.title}»`:""}${date?` ${tin(date)} ${fmtD(date)}`:""}, με τα παρακάτω στοιχεία:`,
+      "",
+      `α) Προορισμός: ${v.dest||"…"}`,
+      "   Πρόγραμμα:",
+      ...prog.map(x=>"   "+x),
+      "   Σύνδεση με τους στόχους της παρ. 2 του άρθρου 2:",
+      ...(goals.length?goals:["   …"]),
+      v.goalText?`   Σύνδεση με το μάθημα: ${v.goalText}`:"",
+      `β) Αρχηγός: ${lead||"…"}`,
+      `γ) Συνοδοί εκπαιδευτικοί: ${escorts.join(", ")||"…"}`,
+      `δ) Τμήματα: ${v.cls.join(", ")||"…"}`,
+      `ε) Αριθμός συμμετεχόντων μαθητών/τριών: ${v.students||"…"}`,
+      "",
+      v.praxi?`Η δράση αποφασίστηκε με την υπ’ αριθμ. ${v.praxi} πράξη του Συλλόγου Διδασκόντων.`:"",
+      v.praxi?"":null,
+      "Ο Διευθυντής",
+      v.director||"Δημήτριος Τσολακίδης"
+    ].filter(l=>l!==null).filter((l,i,a)=>!(l===""&&(i===0||a[i-1]==="")));
+    return {subj,body:L.join("\n"),date};
+  }
+  function renderDDE(v){
+    const {subj,body,date}=ddeMessage(v);
+    $("ddeText").textContent=`Θέμα: ${subj}\n\n${body}`;
+    const dl=$("ddeDeadline");
+    if(date){const last=subWorkdays(date,2);dl.innerHTML=`Αποστολή το αργότερο <b>${esc(fmtD(last))}</b> (2 εργάσιμες πριν, άρθρο 16 παρ. 3).`;}
+    else dl.textContent="Βάλε ημερομηνία μετακίνησης για να βγει η προθεσμία αποστολής.";
+  }
+  let saveT;
+  function update(){
+    const v=read();
+    const r=build(v,false);
+    $("doc").innerHTML=r.html;
+    Object.entries(r.done).forEach(([k,ok])=>document.querySelector(`[data-mark=${k}]`).classList.toggle("done",ok));
+    const st=+v.students||0, te=teacherList(v).length;
+    $("totalOut").textContent=st||te?`${te} συνοδοί · σύνολο ${st+te} άτομα`:"";
+    const d0=mins(v.depTime),d1=mins(v.retTime),dur=$("durOut");
+    if(d0!=null&&d1!=null){
+      if(d1<=d0){dur.textContent="Η ώρα επιστροφής πρέπει να είναι μετά την ώρα αναχώρησης.";dur.className="status bad";}
+      else{dur.textContent=`Διάρκεια περίπου ${Math.floor((d1-d0)/60)} ώρες${(d1-d0)%60?` και ${(d1-d0)%60} λεπτά`:""}.`;dur.className="status good";}
+    }else dur.textContent="";
+    const dd=$("deadOut");
+    if(r.post){
+      const min=addWorkdays(r.post,5);
+      if(r.dead&&r.dead<min){dd.textContent=`Η λήξη είναι νωρίς. Με ανάρτηση ${fmtShort(r.post)}, η λήξη πρέπει να είναι από ${fmtD(min)} και μετά.`;dd.className="status bad";}
+      else if(r.dead&&!isWork(r.dead)){dd.textContent=`Η ${fmtD(r.dead)} δεν είναι εργάσιμη. Διάλεξε εργάσιμη ημέρα για τη λήξη.`;dd.className="status bad";}
+      else if(r.dead&&r.date&&r.dead>=r.date){dd.textContent="Η λήξη πρέπει να είναι πριν από την ημερομηνία της μετακίνησης.";dd.className="status bad";}
+      else{dd.textContent=`Νωρίτερη λήξη: ${fmtD(min)} (5 εργάσιμες μετά την ανάρτηση, χωρίς Σαββατοκύριακα και αργίες, μαζί με την 26/10).`;dd.className="status good";}
+    }else{dd.textContent="Βάλε ημερομηνία ανάρτησης για να βγει η νωρίτερη επιτρεπτή λήξη.";dd.className="status";}
+    if(MODE==="leader"){
+      const need=[[v.leader,"Αρχηγός"],[v.dest,"Προορισμός"],[v.date,"Ημερομηνία"],[v.depTime,"Ώρα αναχώρησης"],[v.stops.length,"Πρόγραμμα (τουλάχιστον μία στάση)"],[v.retTime,"Ώρα επιστροφής"],[v.cls.length,"Τμήματα"],[+v.students,"Αριθμός μαθητών"],[teacherList(v).length,"Συνοδοί εκπαιδευτικοί"]];
+      const miss=need.filter(([x])=>!x).map(([,t])=>t);
+      $("checklist").innerHTML=miss.length?`<h2>Λείπουν ακόμα</h2><ul>${miss.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:`<p class="ok">Όλα έτοιμα. Πάτα «Αποστολή με email».</p>`;
+    }
+    if($("ddeText"))renderDDE(v);
+    clearTimeout(saveT);saveT=setTimeout(()=>save(v),400);
+  }
+  function save(v){
+    try{
+      localStorage.setItem("prosklisi-draft",JSON.stringify(v));
+      const a={};ADMIN_KEYS.forEach(k=>a[k]=v[k]);localStorage.setItem("prosklisi-admin",JSON.stringify(a));
+    }catch(e){}
+  }
+  function load(){
+    let v=null,a=null;
+    try{v=JSON.parse(localStorage.getItem("prosklisi-draft")||"null");a=JSON.parse(localStorage.getItem("prosklisi-admin")||"null");}catch(e){}
+    if(v)write(v);else addStop();
+    if(a)ADMIN_KEYS.forEach(k=>{if(a[k])$(k).value=a[k];});
+    if($("legal").value==="άρθρο 23 της Υ.Α. 109113/ΓΔ4/19-08-2026 (Β΄ 5237)")$("legal").value=$("legal").defaultValue;
+    syncTP();
+  }
+
+  // ---------- κουμπιά
+  const toast=t=>{$("toast").textContent=t;setTimeout(()=>{if($("toast").textContent===t)$("toast").textContent="";},5000);};
+  async function copyRich(html,text){
+    try{
+      await navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([text],{type:"text/plain"})})]);
+      return true;
+    }catch(e){
+      const box=document.createElement("div");box.innerHTML=html;box.style.cssText="position:fixed;left:-9999px;top:0";document.body.appendChild(box);
+      const r=document.createRange();r.selectNodeContents(box);const s=getSelection();s.removeAllRanges();s.addRange(r);
+      let ok=false;try{ok=document.execCommand("copy");}catch(_){}
+      s.removeAllRanges();box.remove();return ok;
+    }
+  }
+  $("copyWeb").onclick=async()=>{
+    const html=build(read(),true).html;
+    const tmp=document.createElement("div");tmp.innerHTML=html;
+    const ok=await copyRich(html,tmp.innerText);
+    toast(ok?"Αντιγράφηκε. Κάνε επικόλληση στο άρθρο του WordPress ή σε έγγραφο Word.":"Η αντιγραφή δεν επιτράπηκε. Επίλεξε το κείμενο της πρόσκλησης και πάτα Ctrl+C.");
+  };
+  $("mail").onclick=async()=>{
+    const v=read();
+    const date=parseD(v.date);
+    const code=await encode(v);
+    const subj=`Μετακίνηση: ${v.title||v.dest||"νέα μετακίνηση"}${date?` (${fmtShort(date)})`:""}`;
+    const lines=[
+      `Αρχηγός: ${v.leader||"-"}`,
+      `Είδος: ${v.kind}`,
+      `Προορισμός: ${v.dest||"-"}`,
+      `Ημερομηνία: ${date?fmtD(date):"-"}, ${v.depTime||"?"}–${v.retTime||"?"}`,
+      `Τμήματα: ${v.cls.join(", ")||"-"}`,
+      `Μαθητές: ${v.students||"-"}`,
+      `Συνοδοί (${teacherList(v).length}): ${teacherList(v).join(", ")||"-"}`,
+      v.notes?`Σημειώσεις: ${v.notes}`:"",
+      "",
+      "Κωδικός φόρμας (επικόλληση στη φόρμα, «Συμπληρώνει η Διεύθυνση του σχολείου»):",
+      code
+    ].filter((l,i,a)=>l!==""||a[i-1]!=="");
+    const body=lines.join("\n");
+    const url=`mailto:${encodeURIComponent(SEND_TO||v.schoolEmail||"")}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+    if(url.length>1900){await copyRich(esc(body).replace(/\n/g,"<br>"),body);toast("Το κείμενο είναι μεγάλο: αντιγράφηκε. Άνοιξε ένα email προς τη Διεύθυνση και κάνε επικόλληση.");return;}
+    window.open(url,"_blank");
+    toast("Ανοίγει το email σου με τα στοιχεία και τον κωδικό της φόρμας.");
+  };
+  let dl=null;
+  async function saveWord(which){
+    if(!window.docx){toast("Το Word δεν φόρτωσε. Έλεγξε τη σύνδεση και ξαναδοκίμασε.");return;}
+    const {doc,name}=buildDocx(read(),which);
+    const blob=await window.docx.Packer.toBlob(doc);
+    if(dl){
+      try{await dl.save({filename:name,data:blob});toast(`Αποθηκεύτηκε: ${name}`);}
+      catch(e){if(e&&e.code!=="declined")toast("Η αποθήκευση δεν έγινε. Ξαναδοκίμασε σε λίγο.");}
+      return;
+    }
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);toast(`Κατέβηκε: ${name}`);
+  }
+  $("wordInvite").onclick=()=>saveWord("invite");
+  // ---------- σελίδα δράσεων
+  function drEntry(){
+    const v=read();const title=v.title||v.dest;
+    if(!v.date||!title)return null;
+    return {id:`${v.date}|${title}`,date:v.date,time:v.depTime&&v.retTime?`${v.depTime}–${v.retTime}`:"",title,classes:v.cls.join(", ")};
+  }
+  async function drCall(payload){
+    const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(Object.assign({adminKey:ADMIN_KEY},payload))});
+    const out=await res.json();
+    if(!out.ok)throw new Error(out.error);
+    return out;
+  }
+  const drWhy=e=>({admin:"λάθος κλειδί Διεύθυνσης στο script",token:"λείπει το κλειδί του GitHub στο script",entry:"ελλιπή στοιχεία"}[e.message]||e.message||"χωρίς σύνδεση");
+  function drRender(list){
+    const ul=$("drList");
+    if(!list.length){ul.innerHTML='<li class="muted">Δεν υπάρχουν εγκεκριμένες μετακινήσεις.</li>';return;}
+    const t=new Date();t.setHours(0,0,0,0);
+    ul.innerHTML="";
+    list.forEach(it=>{
+      const d=parseD(it.date);
+      const li=document.createElement("li");if(d&&d<t)li.className="past";
+      li.innerHTML=`<span class="when">${d?esc(fmtShort(d)):""}</span><span class="what">${esc(it.title)}${it.classes?` <span class="cls">· ${esc(it.classes)}</span>`:""}</span>`;
+      const btns=document.createElement("span");btns.className="btns";
+      const eb=document.createElement("button");eb.type="button";eb.className="btn ghost small";eb.textContent="Αλλαγή";
+      eb.onclick=()=>{
+        if(li.querySelector(".edit"))return;
+        const [t1,t2]=(it.time||"").split(/[–-]/).map(x=>x.trim());
+        const ed=document.createElement("div");ed.className="edit";
+        ed.innerHTML=`<div><label>Νέα ημερομηνία</label><span class="d1"></span></div><div><label>Αναχώρηση</label><span class="t1"></span></div><div><label>Επιστροφή</label><span class="t2"></span></div>`;
+        const sd1=makeDP(ed.querySelector(".d1"),null,it.date);
+        const s1=makeTP(ed.querySelector(".t1"),null,/^\d{2}:\d{2}$/.test(t1||"")?t1:"");
+        const s2=makeTP(ed.querySelector(".t2"),null,/^\d{2}:\d{2}$/.test(t2||"")?t2:"");
+        const ok=document.createElement("button");ok.type="button";ok.className="btn small";ok.textContent="Αποθήκευση";
+        const no=document.createElement("button");no.type="button";no.className="btn ghost small";no.textContent="Άκυρο";
+        no.onclick=()=>ed.remove();
+        ok.onclick=async()=>{
+          const nd=sd1.querySelector(".dval").value;
+          const a=s1.querySelector(".tval").value,z=s2.querySelector(".tval").value;
+          if(!nd){alert("Διάλεξε ημερομηνία.");return;}
+          const entry=Object.assign({},it,{date:nd,id:`${nd}|${it.title}`,time:a&&z?`${a}–${z}`:(it.time||"")});
+          ok.disabled=true;ok.textContent="…";
+          const m=$("drMsg");
+          try{const out=await drCall({action:"approve",entry,oldId:it.id});drRender(out.list||[]);m.textContent="Άλλαξε ✓ Ενημερώνεται στη σελίδα δράσεων σε 1–2 λεπτά.";m.className="sendmsg ok";}
+          catch(e){ok.disabled=false;ok.textContent="Αποθήκευση";m.textContent=`Δεν έγινε (${drWhy(e)}).`;m.className="sendmsg bad";}
+        };
+        ed.append(ok,no);li.appendChild(ed);
+      };
+      const b=document.createElement("button");b.type="button";b.className="btn danger-sm";b.textContent="Αφαίρεση";
+      b.onclick=async()=>{
+        if(!confirm(`Να αφαιρεθεί από τη σελίδα δράσεων η «${it.title}» (${d?fmtShort(d):""});`))return;
+        b.disabled=true;b.textContent="…";
+        try{const out=await drCall({action:"remove",entry:it});drRender(out.list);const m=$("drMsg");m.textContent="Αφαιρέθηκε ✓ Φεύγει από τη σελίδα δράσεων σε 1–2 λεπτά.";m.className="sendmsg ok";}
+        catch(e){b.disabled=false;b.textContent="Αφαίρεση";const m=$("drMsg");m.textContent=`Δεν έγινε (${drWhy(e)}).`;m.className="sendmsg bad";}
+      };
+      btns.append(eb,b);li.appendChild(btns);ul.appendChild(li);
+    });
+  }
+  async function drLoad(){
+    $("drList").innerHTML='<li class="muted">Φόρτωση…</li>';
+    try{const out=await drCall({action:"list"});drRender(out.list||[]);}
+    catch(e){$("drList").innerHTML=`<li class="muted">Η λίστα δεν φορτώθηκε (${esc(drWhy(e))}).</li>`;}
+  }
+  $("drApprove").onclick=async()=>{
+    const m=$("drMsg"),e=drEntry(),btn=$("drApprove");
+    if(!e){m.textContent="Χρειάζονται τουλάχιστον ημερομηνία και τίτλος (ή προορισμός).";m.className="sendmsg bad";return;}
+    btn.disabled=true;m.textContent="Καταχώρηση…";m.className="sendmsg";
+    try{const out=await drCall({action:"approve",entry:e});drRender(out.list||[]);m.textContent="Εγκρίθηκε ✓ Εμφανίζεται στη σελίδα δράσεων σε 1–2 λεπτά.";m.className="sendmsg ok";}
+    catch(err){m.textContent=`Δεν έγινε (${drWhy(err)}).`;m.className="sendmsg bad";}
+    finally{btn.disabled=false;}
+  };
+  $("drRefresh").onclick=drLoad;
+  $("ddeCopy").onclick=async()=>{
+    const {subj,body}=ddeMessage(read());
+    const ok=await copyRich(esc(body).replace(/\n/g,"<br>"),body);
+    const m=$("ddeMsg");m.textContent=ok?`Αντιγράφηκε το κείμενο. Θέμα email: «${subj}»`:"Η αντιγραφή δεν επιτράπηκε. Επίλεξε το κείμενο και πάτα Ctrl+C.";m.className="sendmsg "+(ok?"ok":"bad");
+  };
+  $("ddeMail").onclick=()=>{
+    const v=read(),{subj,body}=ddeMessage(v);
+    location.href=`mailto:${encodeURIComponent(v.ddeEmail||"")}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(body)}`;
+  };
+  drLoad();
+  if(window.claude&&window.claude.use){
+    window.claude.use("downloads").then(x=>{dl=x;}).catch(()=>{});
+  }
+  $("importBtn").onclick=async()=>{
+    try{
+      const v=await decode($("importCode").value);
+      write(v,{keepAdmin:true});PER_INVITE.forEach(k=>$(k).value="");
+      $("importCode").value="";update();toast("Η φόρμα γέμισε με τα στοιχεία του αρχηγού. Συμπλήρωσε πρωτόκολλο και ημερομηνίες.");
+      $("protocol").focus();
+    }catch(e){toast("Ο κωδικός δεν διαβάστηκε. Αντέγραψε ολόκληρη τη γραμμή που ξεκινά με P1: ή P0:.");}
+  };
+  $("newForm").onclick=()=>{
+    const keep={};ADMIN_KEYS.forEach(k=>keep[k]=$(k).value);
+    HTMLFormElement.prototype.reset.call(f);Object.entries(keep).forEach(([k,x])=>$(k).value=x);
+    $("importCode").value="";$("depTime").value="";$("retTime").value="";["date","postDate","deadDate"].forEach(k=>$(k).value="");syncTP();
+    try{localStorage.removeItem("prosklisi-draft");}catch(e){}
+    $("stops").innerHTML="";addStop();update();
+    window.scrollTo({top:0,behavior:"smooth"});toast("Η φόρμα καθάρισε.");
+  };
+
+  f.addEventListener("input",e=>{if(e.target.id!=="importCode")update();});
+  f.addEventListener("change",e=>{if(e.target.id!=="importCode")update();});
+  load();update();
+})();
+</script>
+</body>
+</html>
